@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI-Конвейер</title>
+<!--
+  ВКЛАДКА 1 — ПЕСОЧНИЦА для курса по ИИ.
+  Студент: выбирает нишу → видит на карте реальные бизнесы ЦЕНТРА Москвы без сайта →
+  открывает карточку с разбором → жмёт «Собрать промпт для Lovable» → копирует →
+  идёт во вкладку 2 (Lovable) и собирает сайт.
+
+  КАРТА: OpenStreetMap через Leaflet (тёмные тайлы CARTO). Ключ и регистрация НЕ нужны —
+  карта с пинами работает из коробки. Координаты бизнесов зашиты в данные (геокод адресов).
+  Нужен только интернет (Leaflet и тайлы грузятся с CDN).
+-->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F4F7FC; --panel:#FFFFFF; --panel2:#F2F6FC; --line:rgba(15,27,46,0.10);
+    --text:#0F1B2E; --ink-soft:#4A5A70; --muted:#8593A6; --accent:#2F6BFF; --accent2:#1E50CC;
+    --warn:#D08A1E; --danger:#C9242D; --chip:#EEF3FB;
+    --mono:'IBM Plex Mono',ui-monospace,monospace;
+    --radius:14px; --shadow:0 12px 34px rgba(15,27,46,.12);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{font-family:'Inter',-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
+  header{display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid var(--line);background:#FFFFFF}
+  header .logo{font-weight:800;font-size:17px;letter-spacing:.3px}
+  header .logo b{color:var(--accent)}
+  header .step{font-family:var(--mono);font-size:12px;color:var(--muted);background:var(--chip);padding:5px 10px;border-radius:20px;border:1px solid var(--line)}
+  header .spacer{flex:1}
+  header .cta{text-decoration:none;color:#fff;background:var(--accent);font-weight:700;padding:9px 16px;border-radius:10px;font-size:14px}
+  header .cta:hover{background:var(--accent2)}
+  .layout{display:grid;grid-template-columns:340px 1fr;height:calc(100% - 59px)}
+  .sidebar{border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0;background:var(--panel)}
+  .search{padding:14px 14px 8px}
+  .search label{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+  .search input,.search select{width:100%;margin-top:6px;padding:11px 12px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;color:var(--text);font-size:14px;font-family:inherit;outline:none}
+  .search input:focus,.search select:focus{border-color:var(--accent)}
+  .counter{padding:6px 16px 10px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+  .counter b{color:var(--accent)}
+  .list{flex:1;overflow-y:auto;padding:0 10px 14px}
+  .item{padding:12px 13px;border:1px solid var(--line);border-radius:12px;margin:8px 4px;cursor:pointer;background:var(--panel2);transition:.15s}
+  .item:hover{border-color:var(--accent);transform:translateY(-1px);box-shadow:0 4px 14px rgba(15,27,46,.06)}
+  .item.active{border-color:var(--accent);background:#E7EFFF}
+  .item .name{font-weight:700;font-size:14px;display:flex;justify-content:space-between;gap:8px}
+  .item .meta{font-size:12px;color:var(--muted);margin-top:3px}
+  .badge{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:20px;white-space:nowrap;align-self:center;font-weight:600}
+  .b-none{background:#FDE7E7;color:#C0232C;border:1px solid #F2C2C5}
+  .b-soc{background:#E3ECFF;color:#1E50CC;border:1px solid #C2D5FF}
+  .b-tap{background:#FBF1D9;color:#9A6B12;border:1px solid #EBD7A6}
+  .b-stub{background:#EEE6FB;color:#6A39B5;border:1px solid #DAC9F3}
+  .mapwrap{position:relative;min-height:0;isolation:isolate}
+  #map{width:100%;height:100%;background:#E6ECF3}
+  .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--panel);color:var(--text);border:1px solid var(--line)}
+  .leaflet-popup-content{font-size:13px;line-height:1.5}
+  .leaflet-popup-content a{color:var(--accent);font-weight:600}
+  .leaflet-container a.leaflet-popup-close-button{color:var(--muted)}
+  .leaflet-bar a{background:var(--panel);color:var(--text);border-color:var(--line)}
+  .map-legend{position:absolute;left:12px;bottom:12px;z-index:500;background:rgba(255,255,255,.95);border:1px solid var(--line);border-radius:10px;padding:8px 11px;font-family:var(--mono);font-size:11px;color:var(--ink-soft);box-shadow:0 6px 18px rgba(15,27,46,.10)}
+  .map-legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
+  .mapfallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;text-align:center;padding:40px;color:var(--muted);background:repeating-linear-gradient(45deg,#EEF3FB,#EEF3FB 12px,#F6F9FD 12px,#F6F9FD 24px)}
+  .mapfallback h3{color:var(--text);margin:0}
+  .card{position:fixed;top:59px;right:0;width:480px;max-width:92vw;height:calc(100% - 59px);background:var(--panel);border-left:1px solid var(--line);box-shadow:var(--shadow);transform:translateX(105%);transition:transform .28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;z-index:1100}
+  .card.open{transform:translateX(0)}
+  .card .top{padding:18px 20px;border-bottom:1px solid var(--line);position:relative}
+  .card .close{position:absolute;top:14px;right:16px;cursor:pointer;color:var(--muted);font-size:22px;border:none;background:none}
+  .card h2{margin:0 36px 4px 0;font-size:20px;letter-spacing:-0.02em}
+  .card .sub{color:var(--muted);font-size:13px}
+  .card .body{flex:1;overflow-y:auto;padding:18px 20px}
+  .scanline{height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);animation:scan 1s linear;margin-bottom:14px}
+  @keyframes scan{from{opacity:0;transform:scaleX(.2)}50%{opacity:1}to{opacity:0;transform:scaleX(1)}}
+  .row{display:flex;gap:8px;font-size:13px;margin:7px 0}
+  .row .k{color:var(--muted);min-width:78px}
+  .row a{color:var(--accent);text-decoration:none}
+  .sec{margin-top:18px}
+  .sec h4{margin:0 0 7px;font-family:var(--mono);font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent)}
+  .sec p{margin:0;font-size:13.5px;line-height:1.55;color:var(--ink-soft)}
+  .actions{padding:14px 20px;border-top:1px solid var(--line);display:flex;gap:10px;flex-wrap:wrap}
+  .btn{flex:1;min-width:150px;border:none;border-radius:11px;padding:13px;font-weight:700;font-size:14px;font-family:inherit;cursor:pointer}
+  .btn-main{background:var(--accent);color:#fff}
+  .btn-main:hover{background:var(--accent2)}
+  .btn-sec{background:var(--panel2);color:var(--text);border:1px solid var(--line)}
+  .btn-sec:hover{border-color:var(--accent)}
+  .modal{position:fixed;inset:0;background:rgba(15,27,46,0.55);display:none;align-items:center;justify-content:center;z-index:1200;padding:20px}
+  .modal.open{display:flex}
+  .modal .box{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);width:760px;max-width:96vw;max-height:90vh;display:flex;flex-direction:column;box-shadow:var(--shadow)}
+  .modal .mhead{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+  .modal .mhead h3{margin:0;font-size:16px;flex:1}
+  .modal .mtabs{display:flex;gap:6px;padding:10px 20px 0}
+  .mtab{padding:7px 14px;border-radius:9px 9px 0 0;background:var(--panel2);border:1px solid var(--line);border-bottom:none;cursor:pointer;font-size:13px;color:var(--muted)}
+  .mtab.active{background:var(--bg);color:var(--text);font-weight:600}
+  .modal textarea{flex:1;margin:0 20px;min-height:300px;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:0 10px 10px 10px;padding:14px;font-family:var(--mono);font-size:12.5px;line-height:1.5;resize:none}
+  .modal .mfoot{padding:14px 20px;display:flex;gap:10px;align-items:center}
+  .modal .hint{flex:1;font-size:12px;color:var(--muted)}
+  .copybtn{background:var(--accent);color:#fff;border:none;border-radius:10px;padding:11px 20px;font-weight:700;font-family:inherit;cursor:pointer}
+  .copybtn.done{background:#2E9E5B}
+  .cycle{position:fixed;bottom:14px;left:354px;right:14px;background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:12px;padding:9px 14px;font-size:12px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap;align-items:center;box-shadow:0 8px 24px rgba(15,27,46,.10);z-index:600}
+  .cycle{transition:right .28s cubic-bezier(.4,0,.2,1)}
+  .cycle.shifted{right:494px}
+  .cycle b{color:var(--text)}
+  .cyc-step{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);opacity:.55;transition:opacity .35s,color .35s;white-space:nowrap;cursor:pointer}
+  .cyc-step:hover{opacity:1}
+  .cyc-step .num{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--chip);border:1px solid var(--line);font-family:var(--mono);font-size:11px;font-weight:600;transition:.35s}
+  .cyc-step.done{opacity:1;color:var(--accent)}
+  .cyc-step.done .num{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .cyc-step.active{opacity:1;color:var(--text)}
+  .cyc-step.active .num{background:var(--accent);color:#fff;border-color:var(--accent);animation:cycpulse 1.4s infinite}
+  @keyframes cycpulse{0%,100%{box-shadow:0 0 0 4px rgba(47,107,255,.20)}50%{box-shadow:0 0 0 8px rgba(47,107,255,.04)}}
+  .cyc-arr{color:#C3CEDD;font-size:12px;transition:color .35s}
+  .cyc-arr.passed{color:var(--accent)}
+  @media (max-width:780px){
+    .layout{grid-template-columns:1fr;grid-template-rows:46vh 1fr}
+    .mapwrap{order:1;min-height:0}
+    .sidebar{order:2;border-right:none;border-top:1px solid var(--line)}
+    .card{width:100%}
+    .cycle{left:14px}
+  }
+  ::-webkit-scrollbar{width:9px} ::-webkit-scrollbar-thumb{background:#CBD5E3;border-radius:6px}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">AI-Конвейер</div>
+  <div class="spacer"></div>
+  <a class="cta" href="https://lovable.dev" target="_blank" onclick="setStep(3)">Открыть Lovable ↗</a>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="search">
+      <label>Ниша</label>
+      <select id="niche"></select>
+      <div style="height:10px"></div>
+      <label>Район</label>
+      <select id="area"></select>
+    </div>
+    <div class="counter">Найдено: <b id="count">0</b></div>
+    <div class="list" id="list"></div>
+  </aside>
+
+  <div class="mapwrap">
+    <div id="map"></div>
+    <div class="map-legend" id="legend">
+      <i style="background:#E5484D"></i>нет сайта&nbsp;&nbsp;
+      <i style="background:#2F6BFF"></i>соцсети&nbsp;&nbsp;
+      <i style="background:#D08A1E"></i>taplink&nbsp;&nbsp;
+      <i style="background:#7A4FD0"></i>заглушка
+    </div>
+    <div class="mapfallback" id="mapfallback">
+      <h3>🗺️ Карта недоступна</h3>
+      <div>Не загрузился Leaflet (нет интернета?).<br>Список и карточки слева работают и без карты.</div>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card">
+  <div class="top">
+    <button class="close" onclick="closeCard()">✕</button>
+    <h2 id="c-name"></h2>
+    <div class="sub" id="c-sub"></div>
+  </div>
+  <div class="body" id="c-body"></div>
+  <div class="actions">
+    <button class="btn btn-main" onclick="openPrompt('site')">🪄 Собрать промпт для Lovable</button>
+    <button class="btn btn-sec" onclick="openPrompt('dm')">✉️ Сообщение бизнесу</button>
+  </div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="box">
+    <div class="mhead"><h3 id="m-title">Промпт для Lovable</h3><button class="close" style="position:static;font-size:20px" onclick="closeModal()">✕</button></div>
+    <div class="mtabs">
+      <div class="mtab active" id="tab-site" onclick="switchTab('site')">🪄 Сайт для Lovable</div>
+      <div class="mtab" id="tab-dm" onclick="switchTab('dm')">✉️ Сообщение в директ</div>
+    </div>
+    <textarea id="m-text" readonly></textarea>
+    <div class="mfoot">
+      <div class="hint" id="m-hint">Скопируй и вставь в поле ввода Lovable → сайт соберётся за минуту.</div>
+      <button class="copybtn" id="m-copy" onclick="copyText()">Скопировать</button>
+    </div>
+  </div>
+</div>
+
+<div class="cycle" id="cycle"></div>
+
+<script>
+/* ====================== ДАННЫЕ: реальные бизнесы ЦЕНТРА Москвы без сайта (сбор 28.06.2026) ====================== */
+const DISTRICT_COORDS = {
+  "Маросейка":[55.758,37.635],"Китай-город":[55.756,37.633],"Пятницк":[55.736,37.628],
+  "Замоскворечье":[55.738,37.626],"Мясницк":[55.762,37.635],"Сретенк":[55.770,37.632],
+  "Патриаршие":[55.764,37.594],"Хамовники":[55.736,37.582],"Цветной":[55.770,37.623],
+  "Покровка":[55.759,37.645],"Таганка":[55.737,37.660],"Якиманка":[55.735,37.617],
+  "Чистые пруды":[55.765,37.640],"Арбат":[55.749,37.593],"Басманный":[55.757,37.654],
+  "Курск":[55.757,37.659],"Трубная":[55.766,37.622],"Охотный":[55.757,37.616]
+};
+function geoKey(d){for(const k in DISTRICT_COORDS){if(d.indexOf(k)>=0)return DISTRICT_COORDS[k];}return [55.755,37.625];}
+const STATUS={none:["b-none","нет сайта"],soc:["b-soc","только соцсети"],tap:["b-tap","taplink"],stub:["b-stub","заглушка .clients.site"]};
+
+const DATA = [
+ // ===== Барбершопы =====
+ {niche:"Барбершоп",name:"Альберто (Alberto)",district:"ЦАО · Маросейка / Китай-город",address:"улица Маросейка, 6-8с1",phone:"+7 (926) 588-60-88",url:"https://yandex.kz/maps/org/alberto/169456428334/",st:"soc",socials:"WhatsApp, Telegram",
+  desc:"Барбершоп в 186 м от м. Китай-город. Мужские и женские стрижки, цены ниже среднего по центру (от 1500 ₽). Рейтинг 4.6 (30 отзывов), Wi-Fi, сертификаты.",
+  offers:"Доступная стрижка от 1500 ₽ в шаге от Китай-города, индивидуальный подход, подарочные сертификаты.",
+  pains:"Среди 5+ конкурентов на Маросейке нечем выделиться; запись только через мессенджер; мало отзывов (30) против раскрученных соседей.",
+  missing:"Нет витрины: портфолио до/после, прайса, онлайн-записи на мастера. Запись упирается в переписку, теряются вечерние заявки, нет SEO «барбершоп Маросейка»."},
+ {niche:"Барбершоп",name:"Barber Boutique by Dali",district:"ЦАО · Пятницкая",address:"Пятницкая улица, 18, стр. 3",phone:"+7 (966) 006-93-97",url:"https://yandex.kz/maps/org/barber_boutique_by_dali/39411279465/",st:"soc",socials:"Telegram @barberboutiquebydali",
+  desc:"Бутиковый барбершоп на Пятницкой: королевское бритьё, уход за лицом, прайс 1000–4200 ₽. Рейтинг 5.0 (89 отзывов), камерная атмосфера, продуманный интерьер.",
+  offers:"Позиционирование «бутик»: королевское бритьё, уход за лицом, премиальная атмосфера, стрижка любой сложности 1800 ₽.",
+  pains:"«Бутиковость» не передать карточкой Яндекса — клиент не видит интерьер и уровень; запись только в Telegram; на Пятницкой много барбершопов.",
+  missing:"Нет сайта под премиум: фотогалерея интерьера и работ, мастера, подача дорогих услуг, онлайн-запись 24/7, SEO «барбершоп Пятницкая»."},
+ {niche:"Барбершоп",name:"Минимал (Minimal)",district:"ЦАО · Мясницкая",address:"Мясницкая улица, 22, стр. 1",phone:"+7 (925) 601-01-11",url:"https://yandex.kz/maps/org/minimal/229714511207/",st:"stub",socials:"WhatsApp, Telegram",
+  desc:"Премиум-барбершоп на Мясницкой: моделирование бороды (2500 ₽), пакет «Папа+сын» 5400 ₽, массажные кресла, комплимент-напитки. Рейтинг 5.0 (71 отзыв).",
+  offers:"Премиум-фишки (массажные кресла, напитки, дизайн), семейный пакет «Папа+сын» 5400 ₽, камуфляж седины.",
+  pains:"Сайт — безликая заглушка clients.site, бьёт по премиум-позиционированию; рядом сети (Франт, OldBoy) с нормальными сайтами.",
+  missing:"Нет своего домена: премиальная фотовитрина, прайс на премиум-уход, онлайн-запись. Заглушка не даёт ни SEO, ни брендового адреса для рекламы."},
+ // ===== Маникюр =====
+ {niche:"Студия маникюра",name:"Peppe Nails",district:"ЦАО · Замоскворечье / Пятницкий пер.",address:"Пятницкий переулок, 8, стр. 1",phone:"+7 (999) 003-02-99",url:"https://yandex.kz/maps/org/peppe_neyls/69845080488/",st:"soc",socials:"Telegram, VK, WhatsApp",
+  desc:"Уютная студия маникюра у Третьяковской: комбинированный маникюр от 1500 ₽, покрытие 2500 ₽, педикюр, наращивание. Рейтинг 5.0 (264 отзыва), «Хорошее место 2026».",
+  offers:"-15% на первый визит, комплекс «маникюр+педикюр», запись на конкретного мастера, лояльность для офисного потока в центре.",
+  pains:"Неудобно листать Telegram/VK ради цен и окон; нет понятного «выбрал услугу → цена → время»; доверие собирается по разрозненным отзывам.",
+  missing:"Нет одностраничника с прайсом, портфолио по мастерам, онлайн-записью и картой; нет SEO «маникюр Замоскворечье»; воронка завязана на соцсети и звонок."},
+ {niche:"Студия маникюра",name:"Стейси (Steysi)",district:"ЦАО · Сретенка",address:"улица Сретенка, 27, стр. 1",phone:"+7 (985) 303-08-78",url:"https://yandex.kz/maps/org/steysi/111481988418/",st:"none",socials:"— (только телефон и Яндекс)",
+  desc:"Студия маникюра на Сретенке с уклоном в уход и подологию: японский маникюр 2300 ₽, смарт-педикюр 3500 ₽, медицинский маникюр. Рейтинг 5.0 (43 оценки).",
+  offers:"Позиционирование «здоровье ногтей»: подология + смарт-педикюр как премиум, первый визит-знакомство, пакет «маникюр+уход».",
+  pains:"Минимум точек контакта — нет даже соцсетей, всё на телефоне и Яндексе; нельзя заранее увидеть портфолио и прайс на подологию.",
+  missing:"Нет вообще digital-присутствия кроме карточки: ни сайта, ни соцсетей; нет витрины услуг, страницы про подологию (их отличие), онлайн-записи, сбора отзывов."},
+ {niche:"Студия маникюра",name:"Kaya",district:"ЦАО · Сретенка",address:"улица Сретенка, 27, стр. 8, этаж 1",phone:"+7 (999) 612-44-34",url:"https://yandex.kz/maps/org/kaya/150760721842/",st:"tap",socials:"Taplink, Telegram",
+  desc:"Авторская студия маникюра на Сретенке (личный бренд мастера Айи Коробенковой): маникюр от 2300 ₽, смарт-педикюр 3500 ₽. Рейтинг 4.9 (42 отзыва).",
+  offers:"Перенос с taplink на персональный сайт-бренд: портфолио, прайс, онлайн-запись; первый визит со скидкой; абонемент.",
+  pains:"Taplink — просто список ссылок: нет цельного портфолио, цен и выбора времени; выглядит как у тысяч мастеров, не работает на премиальность; нет SEO.",
+  missing:"Нет своего домена: taplink не индексируется, нет галереи работ, отзывов, онлайн-календаря; нет страницы под «маникюр Сретенка / Сухаревская»."},
+ // ===== Брови и ресницы =====
+ {niche:"Брови и ресницы",name:"Fly Lashes",district:"ЦАО · Патриаршие пруды",address:"Трёхпрудный переулок, 6",phone:"+7 (977) 186-51-56",url:"https://yandex.kz/maps/org/fly_lashes/92263620738/",st:"tap",socials:"Taplink, WhatsApp",
+  desc:"Студия ресниц и бровей у Патриарших (+маникюр): наращивание, ламинирование бровей, 600–5200 ₽. Рейтинг 5.0 (~1491 отзыв!), «Хорошее место 2026».",
+  offers:"В герой: «Ресницы и брови у Патриарших — 5.0 по 1491 отзыву». -10% первому визиту, запись 24/7, связка «ресницы+брови+маникюр за один заход».",
+  pains:"Страшно отдать лицо незнакомому мастеру; держится ли результат, есть ли окно сегодня; у taplink нет витрины работ и записи на мастера.",
+  missing:"Нет сайта: портфолио до/после по услугам и мастерам, прайс с пакетами, блок «как проходит/уход», SEO (taplink не ранжируется). 1491 отзыв негде показать."},
+ {niche:"Брови и ресницы",name:"Lashley",district:"ЦАО · Маросейка / Китай-город",address:"улица Маросейка, 9/2с1",phone:"+7 (928) 613-18-80",url:"https://yandex.kz/maps/org/lashley/19883439437/",st:"stub",socials:"— (заглушка lashley.clients.site)",
+  desc:"Камерная студия наращивания и ламинирования ресниц на Маросейке: ламинирование 2500 ₽, наращивание от 3200 ₽. Рейтинг 4.9 (~122 отзыва).",
+  offers:"Ламинирование от 2500 ₽, наращивание от 3200 ₽ у Китай-города; фиксированный прайс, гарантия переделки, запись к мастеру.",
+  pains:"В отзывах — несовпадение ожиданий у разных мастеров; заглушка clients.site не показывает ни работы, ни прайс — клиент решает вслепую.",
+  missing:"Нет сайта: галерея по мастерам (снять страх «не как на референсе»), прозрачный прайс, страница про стойкость/уход, онлайн-запись к мастеру, работа с возражениями."},
+ {niche:"Брови и ресницы",name:"Lash. Lioness beauty",district:"ЦАО · Хамовники / Кропоткинская",address:"Кропоткинский переулок, 4, стр. 1",phone:"+7 (960) 845-04-96",url:"https://yandex.kz/maps/org/lash_lioness_beauty/80268717732/",st:"stub",socials:"VK, Telegram, WhatsApp (заглушка clients.site)",
+  desc:"Студия ресниц и бровей у Кропоткинской, работает 24/7: наращивание 3500 ₽, ламинирование бровей 4000 ₽. Рейтинг 5.0 (~54 отзыва).",
+  offers:"Запись 24/7 — в заголовок (закрывает «нет времени днём»); наращивание от 3500 ₽, ламинирование бровей от 4000 ₽.",
+  pains:"Страх неровного результата и спешки мастера (звучит в негативе); непонятна система доплат за часы; соцсети раскиданы (VK+TG+мессенджеры).",
+  missing:"Нет сайта: единая витрина вместо россыпи соцсетей, прозрачные доплаты за ночь, портфолио до/после, онлайн-запись (критично при режиме 24/7)."},
+ // ===== Шугаринг и эпиляция =====
+ {niche:"Шугаринг и эпиляция",name:"Gladko. Pro",district:"ЦАО · Чистые пруды / Уланский пер.",address:"Уланский переулок, 11А, этаж 3",phone:"+7 (993) 273-86-55",url:"https://yandex.kz/maps/org/gladko_pro/165414945063/",st:"none",socials:"— (только телефон и Яндекс)",
+  desc:"Камерная студия эпиляции (один мастер): лазер, шугаринг, воск, есть мужские зоны. Бикини лазером ~2500 ₽, комплексы до 7500 ₽. Рейтинг 5.0 (48 отзывов).",
+  offers:"«Лазер+шугаринг у проверенного мастера, без конвейера», комплексы-пакеты со скидкой, первый визит, мужская эпиляция как отдельный оффер, абонемент на курс.",
+  pains:"Страх боли и неумелого мастера, стеснение; недоверие к студии без витрины; непонятна цена заранее; мужчины не понимают, делают ли их.",
+  missing:"Нет сайта: не видно прайса, фото кабинета и мастера, нет «не больно/стерильно/как проходит», своей онлайн-записи и абонементов; мужская аудитория без подтверждения."},
+ {niche:"Шугаринг и эпиляция",name:"So_epil",district:"ЦАО · Маросейка / Китай-город",address:"улица Маросейка, 6-8с1, кабинет 32",phone:"+7 (999) 099-20-04",url:"https://yandex.kz/maps/org/so_epil/46925001914/",st:"soc",socials:"Telegram @so_epil",
+  desc:"Узкий кабинет электроэпиляции на Маросейке — удаление волос навсегда, поминутно от 45 ₽/мин. Рейтинг 5.0 (32 отзыва), стерильно, камерно.",
+  offers:"В заголовок: «электроэпиляция — единственный способ удалить волосы НАВСЕГДА, в т.ч. светлые и седые». Первая консультация с тестовой зоной, расчёт курса, одноразовые иглы.",
+  pains:"Клиент не знает разницы с лазером и проходит мимо; страх боли и нестерильности; поминутный тариф пугает неопределённостью суммы.",
+  missing:"Нет сайта: не объяснить преимущество метода, нет калькулятора «минут и денег на зону», FAQ про боль/стерильность, фото до/после; таргет вести некуда кроме телеграма."},
+ {niche:"Шугаринг и эпиляция",name:"Глоу Скин (Glow Skin)",district:"ЦАО · Маросейка / Китай-город",address:"улица Маросейка, 8, подъезд 3, этаж 3",phone:"+7 (968) 063-14-97",url:"https://yandex.kz/maps/org/glou_skin/214163999933/",st:"soc",socials:"VK",
+  desc:"Салон косметологии и эпиляции на Маросейке: лазер, чистки, пилинги, криолиполиз, удаление тату. Комплекс эпиляции ~5000 ₽. Рейтинг 5.0 (143 оценки).",
+  offers:"Связка «эпиляция + косметология в одном месте в центре», пакет «гладкость+сияние», сезонные летние курсы лазера, абонементы.",
+  pains:"Усталость бегать по салонам; недоверие без витрины; слишком широкий список размывает специализацию; сложно сравнить цены и понять, что входит.",
+  missing:"Широкий спектр без сайта работает против салона — в VK всё свалено; нет структурированного прайса, фото аппаратов/интерьера, до/после, пакетов, онлайн-записи."},
+ // ===== Кондитеры =====
+ {niche:"Кондитер (торты на заказ)",name:"Bodrero",district:"ЦАО · Сретенка / Мещанский",address:"улица Сретенка, 9",phone:"+7 (495) 199-19-98",url:"https://yandex.kz/maps/org/bodrero/54867421312/",st:"tap",socials:"Taplink, VK",
+  desc:"Кафе-кондитерская (французская кухня) на Сретенке: торты, десерты, выпечка, кофе. Рейтинг 4.7 (~2500 отзывов), проходное место в центре.",
+  offers:"Торты на заказ, авторские десерты, корпоративные заказы; высокий поток в центре под индивидуальные праздничные торты.",
+  pains:"На taplink нет каталога тортов, цен и сборки заказа под событие — только кнопки-ссылки; приходится звонить, неясны сроки и цена, теряются те, кто не любит созвоны.",
+  missing:"Нет каталога тортов с фото/ценами, формы предзаказа (начинка, вес, дата), витрины кейсов, SEO «торт на заказ Сретенка». Taplink не закрывает воронку."},
+ {niche:"Кондитер (торты на заказ)",name:"Делюсь Душой",district:"ЦАО · Замоскворечье / Пятницкая",address:"Пятницкая улица, 53/18с1",phone:"+7 (915) 459-55-56",url:"https://yandex.kz/maps/org/delyus_dushoy/31170345115/",st:"soc",socials:"Telegram @ddcoffeemanager",
+  desc:"Кафе-кофейня-кондитерская на Пятницкой: завтраки весь день, выпечка, торты, кофе. Рейтинг 4.6 (~1400 отзывов), формат «третьего места».",
+  offers:"Торты и десерты на заказ, кондитерская витрина, предзаказ выпечки навынос, торты под события.",
+  pains:"Кто хочет торт на праздник — не находит каталога, цен и формы, только Telegram-менеджера; имя «Делюсь Душой» плохо гуглится.",
+  missing:"Нет витрины тортов с ценами, онлайн-формы предзаказа (дата/вес/начинка), посадочной «торты на заказ Пятницкая»; сбыт на ручной переписке."},
+ {niche:"Кондитер (торты на заказ)",name:"Франсуа (Francois Bakery)",district:"ЦАО · Якиманка / Полянка",address:"улица Малая Полянка, 5",phone:"+7 (991) 881-99-95",url:"https://yandex.kz/maps/org/fransua/190581230714/",st:"soc",socials:"Telegram @francois_bakery",
+  desc:"Французская пекарня-кафе в центре: круассаны, багеты, торты, завтраки, кофе. Рейтинг 4.8 (~1100 отзывов), «булочная у дома».",
+  offers:"Торты и десерты на заказ, фирменная выпечка навынос; французский образ — повод продавать тематические праздничные торты премиально.",
+  pains:"Заказ торта/набора на событие — только через Telegram-канал; нет каталога, цен и сроков; теряются те, кто ищет через поиск.",
+  missing:"Нет каталога тортов и сезонных позиций с ценами, формы предзаказа, страницы с фото и отзывами, SEO «французский торт на заказ Полянка»."},
+ // ===== Кофейни =====
+ {niche:"Кофейня / кофе с собой",name:"Coffee matters!",district:"ЦАО · Цветной бульвар",address:"Цветной бульвар, 16/1, этаж 1",phone:"+7 (977) 316-84-41",url:"https://yandex.kz/maps/org/coffee_matters_/244181000708/",st:"stub",socials:"WhatsApp, Telegram (заглушка clients.site)",
+  desc:"Кофе с собой и посадка у Цветного: эспрессо-напитки, французские круассаны, бабл-ти, доставка. Капучино ~300 ₽. Рейтинг 5.0 (194 отзыва), «Хорошее место 2026».",
+  offers:"Авторский кофе и круассаны навынос у Цветного, лояльность и цены чуть ниже соседей, доставка и to-go для офисов.",
+  pains:"Видно только заглушку clients.site без меню; мало посадочных — без предзаказа ждёшь; новому гостю не за что зацепиться среди десятка кофеен.",
+  missing:"Нет сайта с меню/ценами, онлайн-предзаказа навынос, страницы лояльности; clients.site не продаёт и не индексируется; нет QR-меню и базы постоянников."},
+ {niche:"Кофейня / кофе с собой",name:"CapyBaraCoffe",district:"ЦАО · Цветной бульвар",address:"Цветной бульвар, 26, стр. 1, этаж 1",phone:"+7 (925) 838-34-07",url:"https://yandex.kz/maps/org/capybaracoffe/211726098411/",st:"soc",socials:"VK",
+  desc:"Кофе с собой внутри бизнес-центра на Цветном: капучино 200-250 ₽, выпечка от 95 ₽, QR/SberPay. Сезонное меню, милый интерьер.",
+  offers:"Недорогой кофе прямо в БЦ для сотрудников, быстрый формат, сезонное меню, много способов оплаты.",
+  pains:"Точку в БЦ снаружи не видно, легко не найти; меню/цены/часы заранее непонятны; нестабильный сервис под закрытие, а ответить негде.",
+  missing:"Нет сайта/посадочной с меню, ценами и графиком, онлайн-предзаказа для офисного трафика, навигации по БЦ; всё в одной группе VK, нет работы с отзывами."},
+ {niche:"Кофейня / кофе с собой",name:"Coffee Kiss",district:"ЦАО · Патриаршие пруды",address:"Малая Бронная улица, 28",phone:"+7 (985) 057-77-20",url:"https://yandex.kz/maps/org/coffee_kiss/2732621066/",st:"none",socials:"WhatsApp",
+  desc:"Авторская кофейня на Патриках: спешелти-кофе, выпечка, фирменный «воздушный поцелуй» с маскарпоне. Рейтинг 4.8 (282 отзыва), атмосфера фр. кафе.",
+  offers:"Спешелти-кофе и авторская выпечка в атмосфере фр. кафе на Патриках, уютная пауза у прудов, фирменные десерты.",
+  pains:"Гость Патриков выбирает заранее по фото и меню, а в сети нет ничего кроме телефона/WhatsApp; нельзя увидеть меню, забронировать или заказать навынос.",
+  missing:"Нет ни сайта, ни соцсетей — только WhatsApp; нет онлайн-меню с ценами, предзаказа, брони, галереи интерьера и десертов, QR на Патриках."},
+ // ===== Флористы =====
+ {niche:"Флорист (цветы)",name:"Цветок День&Ночь",district:"ЦАО · Маросейка / Китай-город",address:"улица Маросейка, 4/2с1, этаж 1",phone:"+7 (980) 466-31-49",url:"https://yandex.kz/maps/org/tsvetok_den_noch/13253060661/",st:"stub",socials:"WhatsApp, Telegram (заглушка clients.site)",
+  desc:"Круглосуточный цветочный на Маросейке: букеты, авторские композиции, шары, свадебная флористика, доставка от 2 ч. Поштучно 100–900 ₽. Рейтинг 5.0 (~150 отзывов).",
+  offers:"Главная фишка — 24/7 в центре (бизнес, отели, рестораны рядом): «купи букет ночью»; доставка от 2 ч, свадьбы, шары.",
+  pains:"Ночью негде быстро оформить заказ онлайн — звонить неудобно, в мессенджере ждёшь флориста; нет витрины с ценами и наличием.",
+  missing:"Без сайта теряется преимущество 24/7: нет круглосуточной онлайн-витрины с наличием и оплатой, SEO «цветы ночью центр», страницы доставки; всё упирается в звонок."},
+ {niche:"Флорист (цветы)",name:"Цветы говорят",district:"ЦАО · Китай-город / Лучников пер.",address:"Лучников переулок, 4, стр. 1",phone:"+7 (999) 963-33-06",url:"https://yandex.kz/maps/org/tsvety_govoryat/85018243808/",st:"stub",socials:"Telegram (заглушка clients.site)",
+  desc:"Бутиковый цветочный у Китай-города: ставка на редкие и экзотические цветы, сертификаты, доставка день-в-день. Букеты 2400–10650 ₽. Рейтинг 5.0 (~122 отзыва).",
+  offers:"Отстройка — редкие/экзотические цветы, не масс-маркет; сертификаты, доставка в день заказа, человеческий сервис.",
+  pains:"Экзотика продаётся глазами, но без витрины не видно ассортимент и наличие; чтобы узнать цену/доставку — писать в Telegram и ждать.",
+  missing:"Нет сайта-витрины с фото-каталогом, ценами и наличием (а это ядро отстройки), онлайн-заказа и сертификатов, SEO «редкие цветы центр»."},
+ {niche:"Флорист (цветы)",name:"Stvol",district:"ЦАО · Покровка",address:"улица Покровка, 16",phone:"+7 (991) 941-01-38",url:"https://yandex.kz/maps/org/stvol/15951404142/",st:"soc",socials:"Telegram @stvolgarden",
+  desc:"Цветочная студия на пешеходной Покровке: авторские композиции, сухоцветы, свадебная флористика + хендмейд-подарки. Рейтинг 4.9 (~53 отзыва).",
+  offers:"Студийный формат с авторскими композициями и хендмейд-подарками, свадебная флористика, высокий трафик Покровки.",
+  pains:"Нет ни сайта, ни таплинка — только Telegram-ник; ассортимент и цены онлайн не посмотреть; для свадеб нет портфолио-страницы (а решают по картинкам заранее).",
+  missing:"Нет веб-присутствия кроме Telegram: витрина с каталогом и ценами, форма заказа и оплата, страница свадебной флористики с портфолио, SEO «цветы Покровка»."},
+ // ===== Тату =====
+ {niche:"Тату",name:"Тату-студия 27/35",district:"ЦАО · Таганка / Воронцовская",address:"Воронцовская улица, 27/35с1",phone:"+7 (910) 797-42-38",url:"https://yandex.kz/maps/org/tatu_studiya_27_35/60048126946/",st:"soc",socials:"VK, Telegram, WhatsApp",
+  desc:"Уютная тату-студия на Воронцовской: мини от 4000 ₽, средние 10000 ₽, тату-свидание для пар 5000 ₽/ч. Рейтинг 5.0, тёплый приём с угощением.",
+  offers:"Тату-свидание для пар (5000 ₽/ч) как нестандартный оффер, мини-тату от 4000 ₽ как лёгкий вход, коррекция чужих работ, «первое тату без стресса».",
+  pains:"Страх боли, антисанитарии, непредсказуемого результата; непонятна цена и длительность; портфолио мастеров не собрано; запись только в мессенджерах.",
+  missing:"Нет витрины с портфолио по стилям/мастерам, прайсом и онлайн-записью; нет посадочной под рекламу, SEO «тату Таганка», калькулятора и FAQ про боль/заживление."},
+ {niche:"Тату",name:"Royal G",district:"ЦАО · Таганка / Марксистская",address:"Марксистская улица, 5",phone:"+7 (926) 922-32-27",url:"https://yandex.kz/maps/org/royal_g/148284976100/",st:"stub",socials:"Telegram, VK (заглушка clients.site)",
+  desc:"Тату- и пирсинг-студия у м. Марксистская: работы, коррекция, перекрытие тату 7000 ₽/ч, пирсинг. Рейтинг 5.0 (68 оценок).",
+  offers:"Единая ставка 7000 ₽/ч; перекрытие/обновление старых тату как отдельная услуга; бесплатная консультация и эскиз как вход в воронку.",
+  pains:"Клиент сомневается, можно ли перекрыть старую тату и почём; не видит cover-up кейсов; боится боли пирсинга; не отличает от соседних студий Таганки.",
+  missing:"Вместо сайта типовая clients.site без портфолио (особенно cover-up), без онлайн-записи и рекламной посадочной; нет кейсов «было/стало», цен-примеров, ответов на страхи."},
+ {niche:"Тату",name:"Banana (Банана)",district:"ЦАО · Басманный / Курская",address:"Лялин переулок, 1/36с2, этаж 4",phone:"+7 (977) 622-62-62",url:"https://yandex.kz/maps/org/banana/238637350577/",st:"stub",socials:"Telegram, VK, WhatsApp (заглушка clients.site)",
+  desc:"Премиальная тату-студия у Курской/Покровки: художественная тату от 25000 ₽, мини от 10000 ₽, пирсинг, лазерное удаление. Рейтинг 5.0 (216 отзывов), топ-мастера.",
+  offers:"Ставка на именных топ-мастеров (личный бренд), художественная тату премиум-класса, сертификаты 5–30 тыс., лазерное удаление для замкнутого цикла.",
+  pains:"Премиум-клиент (25000 ₽+) хочет заранее видеть стиль и портфолио конкретного мастера, прозрачные цены и запись к человеку; clients.site не передаёт статус.",
+  missing:"Для премиум-чека критично: нет своего сайта, персональных портфолио мастеров, записи к мастеру, посадочной под трафик и сертификаты, SEO «тату Курская»."},
+ // ===== Груминг =====
+ {niche:"Груминг (стрижка собак)",name:"DogsFrogs",district:"ЦАО · Арбат / Филипповский пер.",address:"Филипповский переулок, 16, цоколь",phone:"+7 (985) 385-64-05",url:"https://yandex.kz/maps/org/dogsfrogs/103143256446/",st:"soc",socials:"VK, Telegram, WhatsApp",
+  desc:"Салон груминга у Арбата, спец по длинношёрстным и крупным кошкам: комплекс мейн-кун 7000 ₽, длинношёрстная кошка 5500 ₽. Рейтинг 5.0 (531 отзыв), «Хорошее место 2026».",
+  offers:"Узкий сильный оффер: груминг крупных/длинношёрстных кошек (мейн-куны) и сложные шубы — то, за что берутся неохотно; фикс-пакеты с понятной ценой.",
+  pains:"Страх отдать любимца чужим и получить травмированное животное; непонятна цена по своей породе; запись через мессенджеры без онлайн-окон; нет до/после по породе.",
+  missing:"Нет сайта: онлайн-запись с видимыми слотами, прайс-калькулятор по породе, галерея по породам, страницы мастеров, SEO «груминг мейн-куна центр», страница отзывов."},
+ {niche:"Груминг (стрижка собак)",name:"Бести Грум (Besti Grum)",district:"ЦАО · Хамовники",address:"2-й переулок Тружеников, 4/19с1",phone:"+7 (916) 649-30-44",url:"https://yandex.kz/maps/org/besti_grum/111016715948/",st:"stub",socials:"Telegram, VK (заглушка clients.site)",
+  desc:"Камерный салон груминга в Хамовниках: стрижка разных пород ~4000 ₽, по записи. Рейтинг 5.0 (26 оценок), ласковое отношение, чистота.",
+  offers:"«Груминг с любовью» — бережно, без стресса, для нервных и возрастных собак; доступная для центра единая цена ~4000 ₽.",
+  pains:"Мало отзывов — нужно соцдоказательство; неясно, какие породы и сложные стрижки берут и почём; запись только в мессенджере; заглушка не внушает доверия.",
+  missing:"Заглушка не заменяет сайт: нет онлайн-расписания, прайса по породам, до/после, страницы мастера, собранных отзывов; слабое SEO «груминг Хамовники», нет абонементов."},
+ {niche:"Груминг (стрижка собак)",name:"Хвост и хвостики",district:"ЦАО · Таганка",address:"улица Большие Каменщики, 6, стр. 1",phone:"+7 (925) 546-26-96",url:"https://yandex.kz/maps/org/khvost_i_khvostiki/166674695962/",st:"stub",socials:"VK, Telegram (визитка на tb.ru)",
+  desc:"Салон груминга на Таганке: стрижка собак/кошек, экспресс-линька, крупные (мейн-куны), даже зоопсихолог. От 500 ₽ до 6500 ₽. Рейтинг 5.0 (184 отзыва).",
+  offers:"Всё для питомца в одном месте: от гигиены (когти 500 ₽) до сложного груминга и экзотов + зоопсихолог; сертификаты и скидки.",
+  pains:"Сомнения по уровню мастера по своей породе (есть отзыв про тримминг); широкий список без структурированного прайса путает; запись через мессенджеры.",
+  missing:"Поддомен tb.ru — визитка, не рабочий сайт: нет онлайн-записи по мастерам, полного прайса/калькулятора, до/после, продажи сертификатов, SEO, программы повторных визитов."},
+ // ===== Детейлинг =====
+ {niche:"Детейлинг / автомойка",name:"Meat Wash",district:"ЦАО · Мясницкая / Лубянка",address:"Мясницкая улица, 11",phone:"+7 (965) 229-74-98",url:"https://yandex.kz/maps/org/meat_wash/191686454110/",st:"soc",socials:"Telegram, WhatsApp, YouTube",
+  desc:"Премиум-мойка и детейлинг у Лубянки: мойка с воском ~2850 ₽, химчистка ~8000 ₽, полировка ~10000 ₽, оклейка до 300000 ₽. Рейтинг 5.0 (208 оценок), 2 ч парковки.",
+  offers:"Комплексная мойка с воском, премиум-химчистка, полировка, оклейка кузова с гарантией, кварцевое покрытие в подарок новым.",
+  pains:"Клиент с дорогой машиной хочет премиум без риска: куда записаться, реальные цены/сроки, можно ли доверить оклейку за сотни тысяч; нет витрины до/после.",
+  missing:"Нет сайта — премиум-сегмент выглядит несолидно: нет галереи кейсов, прайса по моделям, страницы про материалы/гарантию, онлайн-записи, SEO «детейлинг центр»."},
+ {niche:"Детейлинг / автомойка",name:"Rs-detailing",district:"ЦАО · Охотный Ряд / пл. Революции",address:"площадь Революции, 3, этаж -1",phone:"+7 (915) 069-59-59",url:"https://yandex.kz/maps/org/rs_detailing/129818059221/",st:"soc",socials:"Telegram, WhatsApp",
+  desc:"Мойка и детейлинг на -1 этаже ТЦ «Охотный Ряд», в двух шагах от Кремля: 2-фазная 1600–1900 ₽, 3-фазная с воском 2200–3000 ₽, химчистка, полировка. Рейтинг 5.0 (142 оценки).",
+  offers:"Мойка пока гуляешь по центру, 2-/3-фазная с воском, детейлинг, химчистка, мойка мотоциклов; «быстро и чётко» недорого для района.",
+  pains:"Надо уложиться в 2 ч бесплатной парковки ТЦ (иначе 400 ₽/ч), понять цену и время заранее, успеть записаться; раздражение от непрозрачности сроков.",
+  missing:"Нет сайта — нельзя заранее увидеть прайс и время услуги (а это бьёт по парковке): нет калькулятора, онлайн-записи на слот, объяснения про парковку, кейсов."},
+ {niche:"Детейлинг / автомойка",name:"Фантом (Phantom Detailing)",district:"ЦАО · Трубная площадь",address:"Трубная площадь, 2, этаж -1",phone:"+7 (925) 199-01-99",url:"https://yandex.kz/maps/org/fantom/104166126596/",st:"stub",socials:"Telegram, WhatsApp (заглушка clients.site)",
+  desc:"Премиум детейлинг у Трубной, 24/7: мойка от 1400 ₽, детейлинг, химчистка, полировка, удаление вмятин/сколов, тонировка. Рейтинг 5.0 (484 оценки) — один из топов центра.",
+  offers:"Полный спектр от мойки до кузовного ремонта и тонировки, круглосуточно — преимущество в заголовок; запись на ночные слоты.",
+  pains:"Хочет премиум-результат и ночной доступ: понять весь спектр и цены, увидеть качество заранее, записаться на удобное время; при 484 отзывах витрины уровня бренда нет.",
+  missing:"Вместо сайта шаблонная clients.site — слабо для бренда с 484 отзывами: нет своего домена и дизайна, до/после, прайса по направлениям, акцента на 24/7, SEO."}
+];
+
+/* Реальные координаты (геокод адресов 28.06.2026), в порядке DATA */
+const COORDS=[
+ [55.75823,37.63808],[55.73487,37.62801],[55.76197,37.63524],[55.74291,37.62979],[55.77169,37.63185],
+ [55.77140,37.63245],[55.76545,37.59995],[55.75799,37.63360],[55.73783,37.59450],[55.76841,37.63769],
+ [55.75753,37.63590],[55.75728,37.63648],[55.76782,37.63142],[55.73510,37.62793],[55.73519,37.61733],
+ [55.76951,37.62334],[55.77133,37.62304],[55.76370,37.59415],[55.75737,37.63366],[55.75890,37.63136],
+ [55.75886,37.64587],[55.73541,37.66209],[55.73719,37.66386],[55.75680,37.65391],[55.74951,37.59879],
+ [55.73612,37.57350],[55.73691,37.65424],[55.76151,37.63243],[55.75650,37.62130],[55.76630,37.62242]
+];
+DATA.forEach((b,i)=>{ b.coords = COORDS[i] || geoKey(b.district); });
+
+/* стиль сайта под нишу — для промпта */
+const STYLE = {
+ "Барбершоп":"брутальный, тёмные тона, дерево и металл, крупная типографика, мужской характер",
+ "Студия маникюра":"нежный светлый минимализм, пастель, женственно, акцент на аккуратность",
+ "Брови и ресницы":"эстетичный светлый бежево-розовый, акцент на крупные портреты/глаза, премиально",
+ "Шугаринг и эпиляция":"чистый и свежий, мятно-белый, ощущение гигиены, заботы и комфорта",
+ "Кондитер (торты на заказ)":"аппетитный тёплый пастельно-кремовый, крупные сочные фото десертов",
+ "Кофейня / кофе с собой":"уютный крафтовый, тёплый коричневый, атмосфера, ламповость",
+ "Флорист (цветы)":"нежный природный зелёно-пудровый, акцент на крупные фото букетов",
+ "Тату":"дерзкий тёмный, графика и контраст, портфолио работ во весь экран",
+ "Груминг (стрижка собак)":"дружелюбный светлый, мягкие цвета, фото счастливых животных, забота",
+ "Детейлинг / автомойка":"техно тёмный глянец, синий/металлик, акцент на «до/после» и качество"
+};
+
+/* ====================== ГЕНЕРАТОРЫ ПРОМПТОВ ====================== */
+function sitePrompt(b){
+ return `Создай современный одностраничный сайт (лендинг) для бизнеса «${b.name}» — ${b.niche.toLowerCase()} в центре Москвы (${b.district}). Язык интерфейса — русский.
+
+КОНТЕКСТ БИЗНЕСА (из карточки Яндекс.Карт):
+• Чем занимаются: ${b.desc}
+• Адрес: ${b.address} · Телефон: ${b.phone}
+• Сейчас своего сайта НЕТ (${STATUS[b.st][1]}), каналы связи: ${b.socials}.
+
+ЗАЧЕМ НУЖЕН САЙТ (главная задача):
+${b.missing}
+
+СТРУКТУРА СТРАНИЦЫ:
+1. Hero-экран: название, короткий цепляющий оффер, кнопка «Записаться»/«Заказать» и телефон ${b.phone}.
+2. Услуги и цены: ${b.offers}
+3. «Почему мы» — закрой боли клиента: ${b.pains}
+4. Галерея работ — сетка из плейсхолдеров под реальные фото.
+5. Отзывы — 3-4 карточки-плейсхолдера (бизнес реально с высоким рейтингом).
+6. Блок записи: форма (имя, телефон, услуга, удобная дата) + карта с адресом «${b.address}» + кнопки мессенджеров (${b.socials}).
+7. Футер: адрес, телефон, режим работы, соцсети.
+
+ДИЗАЙН: ${STYLE[b.niche]||"чистый современный, адаптив"}. Полностью адаптивно под телефон, заметные кнопки призыва к действию, быстрая загрузка.
+
+ДОПОЛНИТЕЛЬНО: добавь в правом нижнем углу плавающую кнопку чата-консультанта (приветствие + быстрые вопросы про услуги и запись).`;
+}
+function dmPrompt(b){
+ const channel = b.socials==="—" || b.socials.indexOf("только")>=0 ? "в личные сообщения" : `в ${b.socials.split(",")[0].trim()}`;
+ return `Здравствуйте! 👋 Меня зовут [имя]. Нашёл вас на Яндекс.Картах — «${b.name}» (${b.district}).
+
+Заметил, что у вас сильная репутация и поток клиентов, но при этом нет своего сайта (${STATUS[b.st][1].toLowerCase()}). Сейчас почти весь выбор клиента — это карточка и переписка ${channel}.
+
+Я собираю сайты на ИИ-инструментах и за вечер сделал для вас рабочий прототип: с прайсом, онлайн-записью и блоком «${b.offers.split(",")[0].toLowerCase().trim()}». Вот ссылка, посмотрите: [вставь ссылку на сайт из Lovable].
+
+Если зайдёт — доведу до боевого варианта со своим доменом и подключу к рекламе. Когда удобно созвониться на 5 минут?`;
+}
+
+/* ====================== UI ====================== */
+let current=null, currentTab='site', mapReady=false, myMap=null, markerLayer=null, markers=[];
+const $=s=>document.querySelector(s);
+const nicheSel=$("#niche"), areaSel=$("#area"), listEl=$("#list");
+
+function areaOf(t){
+ if(/Маросейка|Китай-город|Лучников/.test(t)) return "Китай-город / Маросейка";
+ if(/Пятницк|Замоскворечье|Полянка|Якиманка/.test(t)) return "Замоскворечье";
+ if(/Мясницк|Чистые|Уланск|Лубянка/.test(t)) return "Чистые пруды / Мясницкая";
+ if(/Сретенк/.test(t)) return "Сретенка";
+ if(/Патриаршие/.test(t)) return "Патриаршие пруды";
+ if(/Хамовники|Кропоткин/.test(t)) return "Хамовники";
+ if(/Цветной|Трубная/.test(t)) return "Цветной бульвар";
+ if(/Покровка/.test(t)) return "Покровка";
+ if(/Таганка/.test(t)) return "Таганка";
+ if(/Басманный|Курск|Лялин/.test(t)) return "Курская / Басманный";
+ if(/Арбат|Филипповск/.test(t)) return "Арбат";
+ if(/Охотный|Революции/.test(t)) return "Охотный Ряд";
+ return "Центр";
+}
+DATA.forEach(d=>{ d.area=areaOf(d.district); });
+const niches=["Все ниши",...[...new Set(DATA.map(d=>d.niche))]];
+nicheSel.innerHTML=niches.map(n=>`<option>${n}</option>`).join("");
+const areas=["Все районы",...[...new Set(DATA.map(d=>d.area))].sort()];
+areaSel.innerHTML=areas.map(a=>`<option>${a}</option>`).join("");
+
+function filtered(){
+ const n=nicheSel.value, a=areaSel.value;
+ return DATA.filter(d=>(n==="Все ниши"||d.niche===n) && (a==="Все районы"||d.area===a));
+}
+function render(){
+ const arr=filtered();
+ $("#count").textContent=arr.length;
+ listEl.innerHTML=arr.map(d=>{
+   const i=DATA.indexOf(d), s=STATUS[d.st];
+   return `<div class="item ${current===i?'active':''}" onclick="openCard(${i})">
+     <div class="name">${d.name}<span class="badge ${s[0]}">${s[1]}</span></div>
+     <div class="meta">${d.niche} · ${d.district}</div>
+   </div>`;
+ }).join("") || `<div style="padding:20px;color:var(--muted);font-size:13px">Ничего не найдено. Сбрось фильтр.</div>`;
+ if(mapReady) drawMarkers(arr);
+}
+nicheSel.onchange=render; areaSel.onchange=render;
+
+/* ---- прогресс по этапам (нижняя плашка) ---- */
+const STEPS=["выбери бизнес","изучи разбор","перенеси промпт в Lovable","сгенерируй сайт","добавь агента на сайт","покажи бизнесу"];
+let currentStep=1;
+const cycleEl=$("#cycle");
+function renderSteps(){
+ let html='<b style="margin-right:2px">Этап:</b>';
+ STEPS.forEach((s,idx)=>{
+   const n=idx+1, cls=n<currentStep?'done':n===currentStep?'active':'';
+   if(idx>0) html+=`<span class="cyc-arr ${n<=currentStep?'passed':''}">→</span>`;
+   html+=`<span class="cyc-step ${cls}" onclick="goStep(${n})"><span class="num">${n<currentStep?'✓':n}</span>${s}</span>`;
+ });
+ cycleEl.innerHTML=html;
+}
+function setStep(n){ if(n>currentStep){ currentStep=n; renderSteps(); } }   // авто-прогресс (только вперёд)
+function goStep(n){ currentStep=n; renderSteps(); }                          // ручной клик по этапу
+renderSteps();
+
+function openCard(i){
+ current=i; const b=DATA[i]; const s=STATUS[b.st];
+ $("#c-name").textContent=b.name;
+ $("#c-sub").textContent=`${b.niche} · ${b.district}`;
+ $("#c-body").innerHTML=`
+   <div class="scanline"></div>
+   <div class="row"><span class="k">Статус</span><span><span class="badge ${s[0]}">${s[1]}</span></span></div>
+   <div class="row"><span class="k">Адрес</span><span>${b.address}</span></div>
+   <div class="row"><span class="k">Телефон</span><span>${b.phone}</span></div>
+   <div class="row"><span class="k">Соцсети</span><span>${b.socials}</span></div>
+   <div class="row"><span class="k">Источник</span><a href="${b.url}" target="_blank">карточка на Яндекс.Картах ↗</a></div>
+   <div class="sec"><h4>Что за бизнес</h4><p>${b.desc}</p></div>
+   <div class="sec"><h4>Офферы для сайта</h4><p>${b.offers}</p></div>
+   <div class="sec"><h4>Боли клиента</h4><p>${b.pains}</p></div>
+   <div class="sec"><h4>Чего не хватает без сайта</h4><p>${b.missing}</p></div>
+ `;
+ $("#card").classList.add("open");
+ cycleEl.classList.add("shifted");
+ setStep(2);
+ render();
+ if(mapReady && markers[i]){ myMap.setView(DATA[i].coords,15,{animate:true}); markers[i].openPopup(); }
+}
+function closeCard(){current=null;$("#card").classList.remove("open");cycleEl.classList.remove("shifted");render();}
+
+function openPrompt(tab){ if(current===null)return; currentTab=tab; fillModal(); $("#modal").classList.add("open"); setStep(tab==='dm'?6:3); }
+function switchTab(tab){ currentTab=tab; fillModal(); }
+function fillModal(){
+ const b=DATA[current];
+ $("#tab-site").classList.toggle("active",currentTab==='site');
+ $("#tab-dm").classList.toggle("active",currentTab==='dm');
+ if(currentTab==='site'){
+   $("#m-title").textContent="Промпт для Lovable: "+b.name;
+   $("#m-text").value=sitePrompt(b);
+   $("#m-hint").textContent="Скопируй → открой Lovable → вставь в поле ввода → сайт соберётся за минуту.";
+ } else {
+   $("#m-title").textContent="Сообщение бизнесу: "+b.name;
+   $("#m-text").value=dmPrompt(b);
+   $("#m-hint").textContent="Подставь своё имя и ссылку на готовый сайт, отправь в директ/мессенджер.";
+ }
+ const cp=$("#m-copy"); cp.textContent="Скопировать"; cp.classList.remove("done");
+}
+function closeModal(){$("#modal").classList.remove("open");}
+function copyText(){
+ const t=$("#m-text"); t.select();
+ navigator.clipboard.writeText(t.value).then(()=>{
+   const cp=$("#m-copy"); cp.textContent="✓ Скопировано"; cp.classList.add("done");
+ }).catch(()=>{document.execCommand("copy");});
+ if(currentTab==='site') setStep(3);
+}
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeModal();closeCard();}});
+$("#modal").addEventListener("click",e=>{if(e.target.id==="modal")closeModal();});
+
+/* ====================== КАРТА (Leaflet + OpenStreetMap/CARTO, без ключа) ====================== */
+function markerColor(st){ return st==='none'?'#E5484D':st==='soc'?'#2F6BFF':st==='tap'?'#D08A1E':'#7A4FD0'; }
+function drawMarkers(arr){
+ if(!markerLayer) return;
+ markerLayer.clearLayers(); markers=[];
+ arr.forEach(d=>{
+   const i=DATA.indexOf(d), s=STATUS[d.st];
+   const m=L.circleMarker(d.coords,{radius:9,weight:2,color:'#fff',fillColor:markerColor(d.st),fillOpacity:.95});
+   m.bindTooltip(d.name,{direction:'top'});
+   m.bindPopup(`<b>${d.name}</b><br>${d.niche}<br>${d.address}<br><span style="color:#8b97a7">${s[1]}</span><br><a href="#" onclick="openCard(${i});return false;">открыть карточку →</a>`);
+   m.on('click',()=>openCard(i));
+   markers[i]=m; markerLayer.addLayer(m);
+ });
+}
+function initMap(){
+ myMap=L.map('map',{zoomControl:true,attributionControl:true}).setView([55.757,37.624],12);
+ myMap.attributionControl.setPrefix(false); // убираем подпись Leaflet с флагом
+ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
+   attribution:'© OpenStreetMap, © CARTO', subdomains:'abcd', maxZoom:19
+ }).addTo(myMap);
+ markerLayer=L.layerGroup().addTo(myMap);
+ mapReady=true; $("#mapfallback").style.display="none";
+ render();
+ setTimeout(()=>myMap.invalidateSize(),200);
+ window.addEventListener('resize',()=>myMap.invalidateSize());
+}
+function loadMap(){ if(typeof L==='undefined'){ render(); return; } initMap(); }
+
+render();
+loadMap();
+</script>
+</body>
+</html>
