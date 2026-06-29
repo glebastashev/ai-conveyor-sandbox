@@ -436,11 +436,10 @@ function dmPrompt(b){
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function promptByKey(b,key){ return key==='site'?sitePrompt(b):dmPrompt(b); }
 const FSTEPS=[
- {key:'site', n:1, title:'Промпт: сайт + окошко быстрых ответов', desc:'Открой Qwen (режим Web Dev) → вставь промпт → получишь готовый HTML-файл сайта со встроенным чатом. Можно и в Lovable, если оплачиваешь.'},
- {key:'dm',  n:2, title:'Сообщение бизнесу', desc:'Подставь своё имя и ссылку на готовый сайт, отправь в директ/мессенджер.'}
+ {key:'site', n:1, title:'Промпт: сайт + окошко быстрых ответов', desc:'Открой Qwen (режим Web Dev) → вставь промпт → получишь готовый HTML-файл сайта со встроенным чатом. Можно и в Lovable, если оплачиваешь.'}
 ];
 function buildFunnel(b){
- let h='<div class="funnel"><div class="funnel__lead">Воронка — собери и скопируй по шагам</div>';
+ let h='<div class="funnel"><div class="funnel__lead">Промпт для сайта — скопируй и вставь в Qwen</div>';
  h+=`<div class="funnel__pin"><span class="pinico">📌</span>Выбран: ${b.name} · ${b.area}</div>`;
  FSTEPS.forEach((st,i)=>{
    h+='<div class="fconn"></div>';
