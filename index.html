@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI-Конвейер</title>
+<title>ИИ-Инженер — Пробный урок</title>
 <!--
   ВКЛАДКА 1 — ПЕСОЧНИЦА для курса по ИИ.
   Студент: выбирает нишу → видит на карте реальные бизнесы ЦЕНТРА Москвы без сайта →
@@ -31,7 +31,8 @@
   html,body{margin:0;height:100%}
   body{font-family:'Inter',-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
   header{display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid var(--line);background:#FFFFFF}
-  header .logo{font-weight:800;font-size:17px;letter-spacing:.3px}
+  header .logo{font-weight:800;font-size:17px;letter-spacing:.3px;line-height:1.12;display:flex;flex-direction:column}
+  header .logo .logo-sub{font-family:var(--mono);font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-top:3px}
   header .logo b{color:var(--accent)}
   header .step{font-family:var(--mono);font-size:12px;color:var(--muted);background:var(--chip);padding:5px 10px;border-radius:20px;border:1px solid var(--line)}
   header .spacer{flex:1}
@@ -146,7 +147,7 @@
 </head>
 <body>
 <header>
-  <div class="logo">AI-Конвейер</div>
+  <div class="logo">ИИ-Инженер<span class="logo-sub">Пробный урок</span></div>
   <div class="spacer"></div>
   <a class="cta" href="https://chat.qwen.ai" target="_blank" onclick="setStep(3)">Открыть Qwen ↗</a>
 </header>
