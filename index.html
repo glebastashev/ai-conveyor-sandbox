@@ -18,20 +18,20 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#F6F4EE; --panel:#FFFFFF; --panel2:#F4F2EB; --line:rgba(40,36,28,0.09);
     --text:#23211C; --ink-soft:#5C574B; --muted:#928C7C; --accent:#2F6BFF; --accent2:#1E50CC;
     --claude:#2F6BFF; --warn:#C07A1E; --danger:#C0392B; --chip:#F0EDE4;
-    --mono:'IBM Plex Mono',ui-monospace,monospace; --serif:'Fraunces','Georgia',serif;
+    --mono:'JetBrains Mono',ui-monospace,monospace; --disp:'Space Grotesk','Inter',sans-serif;
     --radius:18px; --shadow:0 14px 40px rgba(40,36,28,.10);
   }
   *{box-sizing:border-box}
   html,body{margin:0;height:100%}
   body{font-family:'Inter',-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
   header{display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid var(--line);background:#FFFFFF}
-  header .logo{font-family:var(--serif);font-weight:600;font-size:21px;letter-spacing:-0.01em;line-height:1.05;display:flex;flex-direction:column}
+  header .logo{font-family:var(--disp);font-weight:700;font-size:20px;letter-spacing:-0.01em;line-height:1.05;display:flex;flex-direction:column}
   header .logo .logo-sub{font-family:var(--mono);font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--claude);margin-top:3px}
   header .logo b{color:var(--accent)}
   header .step{font-family:var(--mono);font-size:12px;color:var(--muted);background:var(--chip);padding:5px 10px;border-radius:20px;border:1px solid var(--line)}
@@ -50,7 +50,7 @@
   .item{padding:12px 13px;border:1px solid var(--line);border-radius:12px;margin:8px 4px;cursor:pointer;background:var(--panel2);transition:.15s}
   .item:hover{border-color:var(--accent);transform:translateY(-1px);box-shadow:0 4px 14px rgba(15,27,46,.06)}
   .item.active{border-color:var(--accent);background:#E7EFFF}
-  .item .name{font-weight:700;font-size:14px;display:flex;justify-content:space-between;gap:8px}
+  .item .name{font-family:var(--disp);font-weight:600;font-size:14px;display:flex;justify-content:space-between;gap:8px}
   .item .meta{font-size:12px;color:var(--muted);margin-top:3px}
   .badge{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:20px;white-space:nowrap;align-self:center;font-weight:600}
   .b-none{background:#FDE7E7;color:#C0232C;border:1px solid #F2C2C5}
@@ -72,7 +72,7 @@
   .card.open{transform:translateX(0)}
   .card .top{padding:18px 20px;border-bottom:1px solid var(--line);position:relative}
   .card .close{position:absolute;top:14px;right:16px;cursor:pointer;color:var(--muted);font-size:22px;border:none;background:none}
-  .card h2{margin:0 36px 4px 0;font-family:var(--serif);font-weight:600;font-size:24px;letter-spacing:-0.01em;line-height:1.1}
+  .card h2{margin:0 36px 4px 0;font-family:var(--disp);font-weight:700;font-size:22px;letter-spacing:-0.01em;line-height:1.1}
   .card .sub{color:var(--muted);font-size:13px}
   .card .body{flex:1;overflow-y:auto;padding:18px 20px}
   .scanline{height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);animation:scan 1s linear;margin-bottom:14px}
@@ -109,7 +109,7 @@
   .vstep__n{width:26px;height:26px;border-radius:50%;background:var(--chip);border:1px solid var(--line);color:var(--muted);font-family:var(--mono);font-weight:600;font-size:12px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;transition:.3s}
   .vstep__line{width:2px;flex:1;min-height:16px;background:var(--line);margin:2px 0;transition:.3s}
   .vstep:last-child .vstep__line{display:none}
-  .vstep__t{font-size:13.5px;color:var(--muted);padding:3px 0 16px;line-height:1.25;transition:.3s}
+  .vstep__t{font-family:var(--disp);font-weight:500;font-size:13.5px;color:var(--muted);padding:3px 0 16px;line-height:1.3;transition:.3s}
   .vstep:last-child .vstep__t{padding-bottom:0}
   .vstep.done .vstep__n{background:var(--accent);border-color:var(--accent);color:#fff}
   .vstep.done .vstep__line{background:var(--accent)}
@@ -126,7 +126,7 @@
   .fstep.open .fstep__card{border-color:var(--accent);box-shadow:0 6px 18px rgba(47,107,255,.10)}
   .fstep__head{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}
   .fstep__n{flex:0 0 24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;font-family:var(--mono);font-weight:600;font-size:12px;display:flex;align-items:center;justify-content:center}
-  .fstep__t{flex:1;font-weight:700;font-size:13.5px;line-height:1.2}
+  .fstep__t{flex:1;font-family:var(--disp);font-weight:600;font-size:13.5px;line-height:1.2}
   .fstep__chev{color:var(--muted);transition:transform .2s;font-size:12px}
   .fstep.open .fstep__chev{transform:rotate(180deg)}
   .fstep__body{display:none;padding:0 14px 14px}
@@ -137,8 +137,14 @@
   .fcopy:hover{background:var(--accent2)}
   .fcopy.done{background:#2E9E5B}
   @media (max-width:880px){
-    .layout{grid-template-columns:1fr;grid-template-rows:auto 42vh 1fr;gap:12px;padding:12px}
-    .card{width:auto;left:0;right:0;top:59px;height:calc(100% - 59px);border-radius:0;border:none;transform:translateX(105%)}
+    html,body{height:auto;overflow:auto}
+    header{position:sticky;top:0;z-index:30}
+    .layout{display:block;height:auto;padding:12px}
+    .steps{overflow:visible;margin-bottom:12px}
+    .mapwrap{height:340px;margin-bottom:12px}
+    .sidebar{overflow:visible;margin-bottom:12px}
+    .list{overflow:visible}
+    .card{width:auto;left:0;right:0;top:0;height:100%;border-radius:0;border:none}
   }
   ::-webkit-scrollbar{width:9px} ::-webkit-scrollbar-thumb{background:#D8D3C7;border-radius:6px}
 </style>
@@ -518,7 +524,7 @@ function render(){
 nicheSel.onchange=render; areaSel.onchange=render;
 
 /* ---- прогресс по этапам (левая колонка) ---- */
-const STEPS=["выбери бизнес","изучи разбор","перенеси промпт в Qwen","сгенерируй сайт с автоответчиком","покажи бизнесу"];
+const STEPS=["Выбери на карте точку с офлайн-бизнесом","Собери разбор этого бизнеса","Скопируй промпт из карточки и перенеси в Qwen","Qwen сгенерирует сайт с автоответчиком по этому промпту","Покажи готовый сайт клиенту"];
 let currentStep=1;
 const stepsEl=$("#steps");
 function renderSteps(){
