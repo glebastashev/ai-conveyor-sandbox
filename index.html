@@ -21,24 +21,24 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#F4F7FC; --panel:#FFFFFF; --panel2:#F2F6FC; --line:rgba(15,27,46,0.10);
-    --text:#0F1B2E; --ink-soft:#4A5A70; --muted:#8593A6; --accent:#2F6BFF; --accent2:#1E50CC;
-    --warn:#D08A1E; --danger:#C9242D; --chip:#EEF3FB;
+    --bg:#FAF9F5; --panel:#FFFFFF; --panel2:#F3F1EA; --line:rgba(40,36,28,0.12);
+    --text:#23211C; --ink-soft:#5C574B; --muted:#928C7C; --accent:#2F6BFF; --accent2:#1E50CC;
+    --claude:#CC785C; --warn:#C07A1E; --danger:#C0392B; --chip:#F0EDE5;
     --mono:'IBM Plex Mono',ui-monospace,monospace;
-    --radius:14px; --shadow:0 12px 34px rgba(15,27,46,.12);
+    --radius:14px; --shadow:0 12px 34px rgba(40,36,28,.14);
   }
   *{box-sizing:border-box}
   html,body{margin:0;height:100%}
   body{font-family:'Inter',-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
   header{display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid var(--line);background:#FFFFFF}
   header .logo{font-weight:800;font-size:17px;letter-spacing:.3px;line-height:1.12;display:flex;flex-direction:column}
-  header .logo .logo-sub{font-family:var(--mono);font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-top:3px}
+  header .logo .logo-sub{font-family:var(--mono);font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--claude);margin-top:3px}
   header .logo b{color:var(--accent)}
   header .step{font-family:var(--mono);font-size:12px;color:var(--muted);background:var(--chip);padding:5px 10px;border-radius:20px;border:1px solid var(--line)}
   header .spacer{flex:1}
   header .cta{text-decoration:none;color:#fff;background:var(--accent);font-weight:700;padding:9px 16px;border-radius:10px;font-size:14px}
   header .cta:hover{background:var(--accent2)}
-  .layout{display:grid;grid-template-columns:340px 1fr;height:calc(100% - 59px)}
+  .layout{display:grid;grid-template-columns:270px 1fr 340px;height:calc(100% - 59px)}
   .sidebar{border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0;background:var(--panel)}
   .search{padding:14px 14px 8px}
   .search label{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
@@ -58,7 +58,7 @@
   .b-tap{background:#FBF1D9;color:#9A6B12;border:1px solid #EBD7A6}
   .b-stub{background:#EEE6FB;color:#6A39B5;border:1px solid #DAC9F3}
   .mapwrap{position:relative;min-height:0;isolation:isolate}
-  #map{width:100%;height:100%;background:#E6ECF3}
+  #map{width:100%;height:100%;background:#ECEAE3}
   .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--panel);color:var(--text);border:1px solid var(--line)}
   .leaflet-popup-content{font-size:13px;line-height:1.5}
   .leaflet-popup-content a{color:var(--accent);font-weight:600}
@@ -81,7 +81,7 @@
   .row .k{color:var(--muted);min-width:78px}
   .row a{color:var(--accent);text-decoration:none}
   .sec{margin-top:18px}
-  .sec h4{margin:0 0 7px;font-family:var(--mono);font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent)}
+  .sec h4{margin:0 0 7px;font-family:var(--mono);font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--claude)}
   .sec p{margin:0;font-size:13.5px;line-height:1.55;color:var(--ink-soft)}
   .actions{padding:14px 20px;border-top:1px solid var(--line);display:flex;gap:10px;flex-wrap:wrap}
   .btn{flex:1;min-width:150px;border:none;border-radius:11px;padding:13px;font-weight:700;font-size:14px;font-family:inherit;cursor:pointer}
@@ -102,23 +102,24 @@
   .modal .hint{flex:1;font-size:12px;color:var(--muted)}
   .copybtn{background:var(--accent);color:#fff;border:none;border-radius:10px;padding:11px 20px;font-weight:700;font-family:inherit;cursor:pointer}
   .copybtn.done{background:#2E9E5B}
-  .cycle{position:fixed;bottom:14px;left:354px;right:14px;background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:12px;padding:9px 14px;font-size:12px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap;align-items:center;box-shadow:0 8px 24px rgba(15,27,46,.10);z-index:600}
-  .cycle{transition:right .28s cubic-bezier(.4,0,.2,1)}
-  .cycle.shifted{right:494px}
-  .cycle b{color:var(--text)}
-  .cyc-step{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);opacity:.55;transition:opacity .35s,color .35s;white-space:nowrap;cursor:pointer}
-  .cyc-step:hover{opacity:1}
-  .cyc-step .num{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--chip);border:1px solid var(--line);font-family:var(--mono);font-size:11px;font-weight:600;transition:.35s}
-  .cyc-step.done{opacity:1;color:var(--accent)}
-  .cyc-step.done .num{background:var(--accent);color:#fff;border-color:var(--accent)}
-  .cyc-step.active{opacity:1;color:var(--text)}
-  .cyc-step.active .num{background:var(--accent);color:#fff;border-color:var(--accent);animation:cycpulse 1.4s infinite}
-  @keyframes cycpulse{0%,100%{box-shadow:0 0 0 4px rgba(47,107,255,.20)}50%{box-shadow:0 0 0 8px rgba(47,107,255,.04)}}
-  .cyc-arr{color:#C3CEDD;font-size:12px;transition:color .35s}
-  .cyc-arr.passed{color:var(--accent)}
+  .steps{border-right:1px solid var(--line);background:var(--panel);padding:18px 16px;overflow-y:auto;min-height:0}
+  .steps__h{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--claude);margin-bottom:16px}
+  .vstep{display:flex;gap:11px;cursor:pointer}
+  .vstep__col{display:flex;flex-direction:column;align-items:center}
+  .vstep__n{width:26px;height:26px;border-radius:50%;background:var(--chip);border:1px solid var(--line);color:var(--muted);font-family:var(--mono);font-weight:600;font-size:12px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;transition:.3s}
+  .vstep__line{width:2px;flex:1;min-height:16px;background:var(--line);margin:2px 0;transition:.3s}
+  .vstep:last-child .vstep__line{display:none}
+  .vstep__t{font-size:13.5px;color:var(--muted);padding:3px 0 16px;line-height:1.25;transition:.3s}
+  .vstep:last-child .vstep__t{padding-bottom:0}
+  .vstep.done .vstep__n{background:var(--accent);border-color:var(--accent);color:#fff}
+  .vstep.done .vstep__line{background:var(--accent)}
+  .vstep.done .vstep__t{color:var(--text)}
+  .vstep.active .vstep__n{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 0 0 4px rgba(47,107,255,.18)}
+  .vstep.active .vstep__t{color:var(--text);font-weight:700}
+  .vstep:hover .vstep__t{color:var(--text)}
   .funnel{margin-top:22px;border-top:1px dashed var(--line);padding-top:16px}
-  .funnel__lead{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:12px}
-  .funnel__pin{display:flex;align-items:center;gap:8px;background:#E7EFFF;border:1px solid #C2D5FF;border-radius:12px;padding:11px 14px;font-size:14px;color:var(--text);font-weight:700}
+  .funnel__lead{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--claude);margin-bottom:12px}
+  .funnel__pin{display:flex;align-items:center;gap:8px;background:#FBEFEA;border:1px solid #E8C8B8;border-radius:12px;padding:11px 14px;font-size:14px;color:var(--text);font-weight:700}
   .funnel__pin .pinico{font-size:15px}
   .fconn{height:14px;margin-left:24px;border-left:2px solid var(--line)}
   .fstep__card{border:1px solid var(--line);border-radius:12px;background:var(--panel2);overflow:hidden;transition:border-color .15s}
@@ -135,14 +136,14 @@
   .fcopy{width:100%;background:var(--accent);color:#fff;border:none;border-radius:9px;padding:11px;font-weight:700;font-family:inherit;font-size:13.5px;cursor:pointer}
   .fcopy:hover{background:var(--accent2)}
   .fcopy.done{background:#2E9E5B}
-  @media (max-width:780px){
-    .layout{grid-template-columns:1fr;grid-template-rows:46vh 1fr}
-    .mapwrap{order:1;min-height:0}
-    .sidebar{order:2;border-right:none;border-top:1px solid var(--line)}
+  @media (max-width:880px){
+    .layout{grid-template-columns:1fr;grid-template-rows:auto 40vh 1fr}
+    .steps{border-right:none;border-bottom:1px solid var(--line)}
+    .mapwrap{min-height:0}
+    .sidebar{border-right:none;border-top:1px solid var(--line)}
     .card{width:100%}
-    .cycle{left:14px}
   }
-  ::-webkit-scrollbar{width:9px} ::-webkit-scrollbar-thumb{background:#CBD5E3;border-radius:6px}
+  ::-webkit-scrollbar{width:9px} ::-webkit-scrollbar-thumb{background:#D8D3C7;border-radius:6px}
 </style>
 </head>
 <body>
@@ -153,17 +154,7 @@
 </header>
 
 <div class="layout">
-  <aside class="sidebar">
-    <div class="search">
-      <label>Ниша</label>
-      <select id="niche"></select>
-      <div style="height:10px"></div>
-      <label>Район</label>
-      <select id="area"></select>
-    </div>
-    <div class="counter">Найдено: <b id="count">0</b></div>
-    <div class="list" id="list"></div>
-  </aside>
+  <aside class="steps" id="steps"></aside>
 
   <div class="mapwrap">
     <div id="map"></div>
@@ -175,9 +166,21 @@
     </div>
     <div class="mapfallback" id="mapfallback">
       <h3>🗺️ Карта недоступна</h3>
-      <div>Не загрузился Leaflet (нет интернета?).<br>Список и карточки слева работают и без карты.</div>
+      <div>Не загрузился Leaflet (нет интернета?).<br>Список и карточки работают и без карты.</div>
     </div>
   </div>
+
+  <aside class="sidebar">
+    <div class="search">
+      <label>Ниша</label>
+      <select id="niche"></select>
+      <div style="height:10px"></div>
+      <label>Район</label>
+      <select id="area"></select>
+    </div>
+    <div class="counter">Найдено: <b id="count">0</b></div>
+    <div class="list" id="list"></div>
+  </aside>
 </div>
 
 <div class="card" id="card">
@@ -188,8 +191,6 @@
   </div>
   <div class="body" id="c-body"></div>
 </div>
-
-<div class="cycle" id="cycle"></div>
 
 <script>
 /* ====================== ДАННЫЕ: реальные бизнесы ЦЕНТРА Москвы без сайта (сбор 28.06.2026) ====================== */
@@ -504,18 +505,20 @@ function render(){
 }
 nicheSel.onchange=render; areaSel.onchange=render;
 
-/* ---- прогресс по этапам (нижняя плашка) ---- */
+/* ---- прогресс по этапам (левая колонка) ---- */
 const STEPS=["выбери бизнес","изучи разбор","перенеси промпт в Qwen","сгенерируй сайт с автоответчиком","покажи бизнесу"];
 let currentStep=1;
-const cycleEl=$("#cycle");
+const stepsEl=$("#steps");
 function renderSteps(){
- let html='<b style="margin-right:2px">Этап:</b>';
+ let html='<div class="steps__h">Этапы</div>';
  STEPS.forEach((s,idx)=>{
    const n=idx+1, cls=n<currentStep?'done':n===currentStep?'active':'';
-   if(idx>0) html+=`<span class="cyc-arr ${n<=currentStep?'passed':''}">→</span>`;
-   html+=`<span class="cyc-step ${cls}" onclick="goStep(${n})"><span class="num">${n<currentStep?'✓':n}</span>${s}</span>`;
+   html+=`<div class="vstep ${cls}" onclick="goStep(${n})">
+     <div class="vstep__col"><div class="vstep__n">${n<currentStep?'✓':n}</div><div class="vstep__line"></div></div>
+     <div class="vstep__t">${s}</div>
+   </div>`;
  });
- cycleEl.innerHTML=html;
+ stepsEl.innerHTML=html;
 }
 function setStep(n){ if(n>currentStep){ currentStep=n; renderSteps(); } }   // авто-прогресс (только вперёд)
 function goStep(n){ currentStep=n; renderSteps(); }                          // ручной клик по этапу
@@ -539,12 +542,11 @@ function openCard(i){
    ${buildFunnel(b)}
  `;
  $("#card").classList.add("open");
- cycleEl.classList.add("shifted");
  setStep(2);
  render();
  if(mapReady && markers[i]){ myMap.setView(DATA[i].coords,15,{animate:true}); markers[i].openPopup(); }
 }
-function closeCard(){current=null;$("#card").classList.remove("open");cycleEl.classList.remove("shifted");render();}
+function closeCard(){current=null;$("#card").classList.remove("open");render();}
 
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeCard();}});
 
