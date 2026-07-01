@@ -21,16 +21,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Onest:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#F6F4EE; --panel:#FFFFFF; --panel2:#F4F2EB; --line:rgba(40,36,28,0.09);
-    --text:#23211C; --ink-soft:#5C574B; --muted:#928C7C; --accent:#2F6BFF; --accent2:#1E50CC;
-    --claude:#2F6BFF; --warn:#C07A1E; --danger:#C0392B; --chip:#F0EDE4;
+    --bg:#14161C; --panel:#1D212B; --panel2:#242A36; --line:rgba(255,255,255,0.10);
+    --text:#E9ECF2; --ink-soft:#AEB6C4; --muted:#99A2B2; --accent:#4D8DFF; --accent2:#3B7BEA;
+    --claude:#4D8DFF; --warn:#E0A83E; --danger:#F07070; --chip:#242A36;
     --mono:'JetBrains Mono',ui-monospace,monospace; --disp:'Onest','Manrope',sans-serif;
-    --radius:18px; --shadow:0 14px 40px rgba(40,36,28,.10);
+    --radius:18px; --shadow:0 16px 40px rgba(0,0,0,.45);
   }
   *{box-sizing:border-box}
   html,body{margin:0;height:100%}
   body{font-family:'Manrope',-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
-  header{display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid var(--line);background:#FFFFFF}
+  header{display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid var(--line);background:var(--panel)}
   header .logo{font-family:var(--disp);font-weight:700;font-size:20px;letter-spacing:-0.01em;line-height:1.05;display:flex;flex-direction:column}
   header .logo .logo-sub{font-family:var(--mono);font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--claude);margin-top:3px}
   header .logo b{color:var(--accent)}
@@ -49,24 +49,24 @@
   .list{flex:1;overflow-y:auto;padding:0 10px 14px}
   .item{padding:12px 13px;border:1px solid var(--line);border-radius:12px;margin:8px 4px;cursor:pointer;background:var(--panel2);transition:.15s}
   .item:hover{border-color:var(--accent);transform:translateY(-1px);box-shadow:0 4px 14px rgba(15,27,46,.06)}
-  .item.active{border-color:var(--accent);background:#E7EFFF}
+  .item.active{border-color:var(--accent);background:#15233B}
   .item .name{font-family:var(--disp);font-weight:600;font-size:14px;display:flex;justify-content:space-between;gap:8px}
   .item .meta{font-size:12px;color:var(--muted);margin-top:3px}
   .badge{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:20px;white-space:nowrap;align-self:center;font-weight:600}
-  .b-none{background:#FDE7E7;color:#C0232C;border:1px solid #F2C2C5}
-  .b-soc{background:#E3ECFF;color:#1E50CC;border:1px solid #C2D5FF}
-  .b-tap{background:#FBF1D9;color:#9A6B12;border:1px solid #EBD7A6}
-  .b-stub{background:#EEE6FB;color:#6A39B5;border:1px solid #DAC9F3}
+  .b-none{background:#2E1719;color:#FF8A80;border:1px solid #5C2A2E}
+  .b-soc{background:#15233B;color:#86B6FF;border:1px solid #28406B}
+  .b-tap{background:#2E2411;color:#FFD166;border:1px solid #5C4A1E}
+  .b-stub{background:#241A38;color:#C0A8FF;border:1px solid #443A66}
   .mapwrap{position:relative;min-height:0;isolation:isolate;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
-  #map{width:100%;height:100%;background:#ECEAE3}
+  #map{width:100%;height:100%;background:#14161C}
   .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--panel);color:var(--text);border:1px solid var(--line)}
   .leaflet-popup-content{font-size:13px;line-height:1.5}
   .leaflet-popup-content a{color:var(--accent);font-weight:600}
   .leaflet-container a.leaflet-popup-close-button{color:var(--muted)}
   .leaflet-bar a{background:var(--panel);color:var(--text);border-color:var(--line)}
-  .map-legend{position:absolute;left:12px;bottom:12px;z-index:500;background:rgba(255,255,255,.95);border:1px solid var(--line);border-radius:10px;padding:8px 11px;font-family:var(--mono);font-size:11px;color:var(--ink-soft);box-shadow:0 6px 18px rgba(15,27,46,.10)}
+  .map-legend{position:absolute;left:12px;bottom:12px;z-index:500;background:rgba(29,33,43,.95);border:1px solid var(--line);border-radius:10px;padding:8px 11px;font-family:var(--mono);font-size:11px;color:var(--ink-soft);box-shadow:0 6px 18px rgba(0,0,0,.35)}
   .map-legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
-  .mapfallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;text-align:center;padding:40px;color:var(--muted);background:repeating-linear-gradient(45deg,#EEF3FB,#EEF3FB 12px,#F6F9FD 12px,#F6F9FD 24px)}
+  .mapfallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;text-align:center;padding:40px;color:var(--muted);background:repeating-linear-gradient(45deg,#161922,#161922 12px,#1B1F29 12px,#1B1F29 24px)}
   .mapfallback h3{color:var(--text);margin:0}
   .card{position:fixed;top:73px;right:14px;width:470px;max-width:92vw;height:calc(100% - 87px);background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);transform:translateX(calc(100% + 26px));transition:transform .28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;z-index:1100;overflow:hidden}
   .card.open{transform:translateX(0)}
@@ -119,7 +119,7 @@
   .vstep:hover .vstep__t{color:var(--text)}
   .funnel{margin-top:22px;border-top:1px dashed var(--line);padding-top:16px}
   .funnel__lead{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--claude);margin-bottom:12px}
-  .funnel__pin{display:flex;align-items:center;gap:8px;background:#E7EFFF;border:1px solid #C9DAFF;border-radius:12px;padding:11px 14px;font-size:14px;color:var(--text);font-weight:700}
+  .funnel__pin{display:flex;align-items:center;gap:8px;background:#15233B;border:1px solid #28406B;border-radius:12px;padding:11px 14px;font-size:14px;color:var(--text);font-weight:700}
   .funnel__pin .pinico{font-size:15px}
   .fconn{height:14px;margin-left:24px;border-left:2px solid var(--line)}
   .fstep__card{border:1px solid var(--line);border-radius:12px;background:var(--panel2);overflow:hidden;transition:border-color .15s}
@@ -146,7 +146,7 @@
     .list{overflow:visible}
     .card{width:auto;left:0;right:0;top:0;height:100%;border-radius:0;border:none}
   }
-  ::-webkit-scrollbar{width:9px} ::-webkit-scrollbar-thumb{background:#D8D3C7;border-radius:6px}
+  ::-webkit-scrollbar{width:9px} ::-webkit-scrollbar-thumb{background:#2A3140;border-radius:6px}
 </style>
 </head>
 <body>
@@ -594,7 +594,7 @@ function drawMarkers(arr){
 function initMap(){
  myMap=L.map('map',{zoomControl:true,attributionControl:true}).setView([55.757,37.624],12);
  myMap.attributionControl.setPrefix(false); // убираем подпись Leaflet с флагом
- L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
+ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
    attribution:'© OpenStreetMap, © CARTO', subdomains:'abcd', maxZoom:19
  }).addTo(myMap);
  markerLayer=L.layerGroup().addTo(myMap);
