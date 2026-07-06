@@ -139,6 +139,44 @@
   .fcopy:hover{background:var(--accent2)}
   .fcopy.done{background:#2E9E5B}
 
+
+  /* --- крем-инверсия: этапы, карточка, модалка (ритм как в референсе) --- */
+  .steps{background:var(--cream);border-color:transparent}
+  .steps__h{color:#0E5A4C}
+  .vstep__t{color:#6A6A5E}
+  .vstep__n{background:#E0DFD2;border-color:#D5D4C6;color:#7A7A6E}
+  .vstep__line{background:#D8D7CA}
+  .vstep.done .vstep__t,.vstep.active .vstep__t,.vstep:hover .vstep__t{color:#121210}
+  .vstep.done .vstep__n,.vstep.active .vstep__n{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+  .card{background:var(--cream);color:#121210}
+  .card .top{border-bottom:1px solid #DDDCCF}
+  .card .sub{color:#6A6A5E}
+  .card .close{color:#6A6A5E}
+  .card .row .k{color:#6A6A5E}
+  .card .row a{color:#0E5A4C;font-weight:700}
+  .card .sec h4{color:#0E5A4C}
+  .card .sec p{color:#3F3F37}
+  .card .actions{border-top:1px solid #DDDCCF}
+  .card .btn-sec{background:#E2E1D4;color:#121210;border:1px solid #CFCEC0}
+  .card .btn-sec:hover{border-color:#0E5A4C}
+  .card .fstep__card{background:#E6E5D8;border-color:#D5D4C6}
+  .card .fstep.open .fstep__card{border-color:#0E5A4C;box-shadow:0 6px 18px rgba(4,57,51,.12)}
+  .card .fstep__desc{color:#6A6A5E}
+  .card .fstep__t{color:#121210}
+  .card .fstep__chev{color:#8A8A7E}
+  .card .fcode{background:#F7F6EF;color:#1A1A18;border-color:#D5D4C6}
+  .card .funnel{border-top:1px dashed #CFCEC0}
+  .card .funnel__lead{color:#0E5A4C}
+  .card .funnel__pin{background:#0E2A1F;border-color:#1E4A35;color:#EDECE3}
+  .card .fconn{border-left:2px solid #D5D4C6}
+  .modal .box{background:var(--cream);color:#121210}
+  .modal .mhead{border-bottom:1px solid #DDDCCF}
+  .modal .mhead h3{color:#121210}
+  .modal .mtab{background:#E2E1D4;border-color:#CFCEC0;color:#6A6A5E}
+  .modal .mtab.active{background:var(--cream);color:#121210}
+  .modal textarea{background:#F7F6EF;color:#1A1A18;border-color:#D5D4C6}
+  .modal .hint{color:#6A6A5E}
+
   /* --- фоновый шум (deliberate, лёгкий) --- */
   .bgnoise{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
   .bgnoise span{position:absolute;font-family:var(--mono);font-weight:700;color:var(--accent);user-select:none}
@@ -147,8 +185,7 @@
   .bgnoise .g3{top:56%;left:18%;font-size:64px;opacity:.045;color:var(--cream)}
   .bgnoise .g4{top:16%;right:6%;font-size:72px;opacity:.05;color:var(--cream);transform:rotate(6deg)}
   body::after{content:"";position:fixed;inset:0;z-index:2500;pointer-events:none;opacity:.05;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E")}
-  .layout,header,.card,.modal{position:relative;z-index:1}
-  .card{z-index:1100}.modal{z-index:1200}
+  .layout,header,.marquee{position:relative;z-index:1}
   .squig{display:block;margin-top:4px}
   .marquee{position:relative;z-index:1;height:24px;display:flex;align-items:center;overflow:hidden;border-bottom:1px solid var(--line);background:var(--bg)}
   .marquee__in{white-space:nowrap;font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);opacity:.55;animation:mq 40s linear infinite}
