@@ -22,7 +22,7 @@
 <style>
   :root{
     --bg:#111827; --panel:#1A2333; --panel2:#232D42; --line:rgba(255,255,255,0.09);
-    --text:#E7E5E0; --ink-soft:#C4C8D2; --muted:#8A90A2; --accent:#4356DB; --accent2:#5063E2;
+    --text:#E7E5E0; --ink-soft:#C4C8D2; --muted:#8A90A2; --accent:#4460C4; --accent2:#5570CF;
     --accent-ink:#F0EDE4; --claude:#9BA0AE; --warn:#E0A83E; --danger:#F07070; --chip:#232D42;
     --cream:#F9F8F3;
     --mono:'JetBrains Mono',ui-monospace,monospace; --disp:'Unbounded','Onest','Manrope',sans-serif;
@@ -55,7 +55,7 @@
   .item .meta{font-size:12px;color:var(--muted);margin-top:3px}
   .badge{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:20px;white-space:nowrap;align-self:center;font-weight:600}
   .b-none{background:#2E1719;color:#FF8A80;border:1px solid #5C2A2E}
-  .b-soc{background:#2E3FB0;color:#8FD9A8;border:1px solid #4356DB}
+  .b-soc{background:#3A53B5;color:#8FD9A8;border:1px solid #4460C4}
   .b-tap{background:#2E2411;color:#FFD166;border:1px solid #5C4A1E}
   .b-stub{background:#241A38;color:#C0A8FF;border:1px solid #443A66}
   .mapwrap{position:relative;min-height:0;isolation:isolate;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
@@ -116,16 +116,16 @@
   .vstep.done .vstep__n{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
   .vstep.done .vstep__line{background:var(--accent)}
   .vstep.done .vstep__t{color:var(--text)}
-  .vstep.active .vstep__n{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);box-shadow:0 0 0 4px rgba(67,86,219,.30)}
+  .vstep.active .vstep__n{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);box-shadow:0 0 0 4px rgba(68,96,196,.30)}
   .vstep.active .vstep__t{color:var(--text);font-weight:700}
   .vstep:hover .vstep__t{color:var(--text)}
   .funnel{margin-top:22px;border-top:1px dashed var(--line);padding-top:16px}
   .funnel__lead{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--claude);margin-bottom:12px}
-  .funnel__pin{display:flex;align-items:center;gap:8px;background:#2E3FB0;border:1px solid #4356DB;border-radius:8px;padding:11px 14px;font-size:14px;color:var(--text);font-weight:700}
+  .funnel__pin{display:flex;align-items:center;gap:8px;background:#3A53B5;border:1px solid #4460C4;border-radius:8px;padding:11px 14px;font-size:14px;color:var(--text);font-weight:700}
   .funnel__pin .pinico{font-size:15px}
   .fconn{height:14px;margin-left:24px;border-left:2px solid var(--line)}
   .fstep__card{border:1px solid var(--line);border-radius:12px;background:var(--panel2);overflow:hidden;transition:border-color .15s}
-  .fstep.open .fstep__card{border-color:var(--accent);box-shadow:0 6px 18px rgba(67,86,219,.15)}
+  .fstep.open .fstep__card{border-color:var(--accent);box-shadow:0 6px 18px rgba(68,96,196,.15)}
   .fstep__head{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}
   .fstep__n{flex:0 0 24px;height:24px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-family:var(--mono);font-weight:600;font-size:12px;display:flex;align-items:center;justify-content:center}
   .fstep__t{flex:1;font-family:inherit;font-weight:700;font-size:13.5px;line-height:1.2}
@@ -142,7 +142,7 @@
 
   /* --- крем-инверсия: этапы, карточка, модалка (ритм как в референсе) --- */
   .steps{background:var(--cream);border-color:transparent}
-  .steps__h{color:#3143C8}
+  .steps__h{color:#3552B0}
   .vstep__t{color:#6A6A5E}
   .vstep__n{background:#E0DFD2;border-color:#D5D4C6;color:#7A7A6E}
   .vstep__line{background:#D8D7CA}
@@ -153,21 +153,21 @@
   .card .sub{color:#6A6A5E}
   .card .close{color:#6A6A5E}
   .card .row .k{color:#6A6A5E}
-  .card .row a{color:#3143C8;font-weight:700}
-  .card .sec h4{color:#3143C8}
+  .card .row a{color:#3552B0;font-weight:700}
+  .card .sec h4{color:#3552B0}
   .card .sec p{color:#3F3F37}
   .card .actions{border-top:1px solid #DDDCCF}
   .card .btn-sec{background:#E2E1D4;color:#121210;border:1px solid #CFCEC0}
-  .card .btn-sec:hover{border-color:#3143C8}
+  .card .btn-sec:hover{border-color:#3552B0}
   .card .fstep__card{background:#E6E5D8;border-color:#D5D4C6}
-  .card .fstep.open .fstep__card{border-color:#3143C8;box-shadow:0 6px 18px rgba(4,57,51,.12)}
+  .card .fstep.open .fstep__card{border-color:#3552B0;box-shadow:0 6px 18px rgba(4,57,51,.12)}
   .card .fstep__desc{color:#6A6A5E}
   .card .fstep__t{color:#121210}
   .card .fstep__chev{color:#8A8A7E}
   .card .fcode{background:#F7F6EF;color:#1A1A18;border-color:#D5D4C6}
   .card .funnel{border-top:1px dashed #CFCEC0}
-  .card .funnel__lead{color:#3143C8}
-  .card .funnel__pin{background:#2E3FB0;border-color:#4356DB;color:#F9F8F3}
+  .card .funnel__lead{color:#3552B0}
+  .card .funnel__pin{background:#3A53B5;border-color:#4460C4;color:#F9F8F3}
   .card .fconn{border-left:2px solid #D5D4C6}
   .modal .box{background:var(--cream);color:#121210}
   .modal .mhead{border-bottom:1px solid #DDDCCF}
@@ -180,14 +180,14 @@
 
   /* --- крем: правая панель (фильтры + список) --- */
   .sidebar{background:var(--cream);border-color:transparent}
-  .search label{color:#3143C8}
+  .search label{color:#3552B0}
   .search input,.search select{background:#F7F6EF;border:1px solid #CFCEC0;color:#121210}
-  .search input:focus,.search select:focus{border-color:#3143C8}
+  .search input:focus,.search select:focus{border-color:#3552B0}
   .counter{color:#6A6A5E}
-  .counter b{color:#3143C8}
+  .counter b{color:#3552B0}
   .item{background:#F7F6EF;border-color:#D5D4C6}
-  .item:hover{border-color:#3143C8;box-shadow:0 4px 14px rgba(4,57,51,.10)}
-  .item.active{border-color:#3143C8;background:#E2E7FB}
+  .item:hover{border-color:#3552B0;box-shadow:0 4px 14px rgba(4,57,51,.10)}
+  .item.active{border-color:#3552B0;background:#E3E8F8}
   .item .name{color:#121210}
   .item .meta{color:#6A6A5E}
   .b-none{background:#F6DEDA;color:#A83226;border:1px solid #E4B7AF}
