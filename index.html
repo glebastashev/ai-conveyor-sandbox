@@ -21,10 +21,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Onest:wght@500;600;700;800&family=Unbounded:wght@500;700;900&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#121210; --panel:#1A1A18; --panel2:#232320; --line:rgba(255,255,255,0.09);
-    --text:#F4F4EC; --ink-soft:#C8C8BC; --muted:#8F8F84; --accent:#B5E916; --accent2:#C9F53F;
-    --accent-ink:#043933; --claude:#B5E916; --warn:#E0A83E; --danger:#F07070; --chip:#232320;
-    --cream:#EDECE3;
+    --bg:#111827; --panel:#1A2333; --panel2:#232D42; --line:rgba(255,255,255,0.09);
+    --text:#E7E5E0; --ink-soft:#C4C8D2; --muted:#8A90A2; --accent:#004743; --accent2:#0A5A54;
+    --accent-ink:#F0EDE4; --claude:#9BA0AE; --warn:#E0A83E; --danger:#F07070; --chip:#232D42;
+    --cream:#F9F8F3;
     --mono:'JetBrains Mono',ui-monospace,monospace; --disp:'Unbounded','Onest','Manrope',sans-serif;
     --radius:12px; --shadow:0 16px 40px rgba(0,0,0,.5);
   }
@@ -59,7 +59,7 @@
   .b-tap{background:#2E2411;color:#FFD166;border:1px solid #5C4A1E}
   .b-stub{background:#241A38;color:#C0A8FF;border:1px solid #443A66}
   .mapwrap{position:relative;min-height:0;isolation:isolate;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
-  #map{width:100%;height:100%;background:#14161C}
+  #map{width:100%;height:100%;background:#111827}
   #map .leaflet-tile{filter:brightness(1.7) contrast(1.02)}
   .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--panel);color:var(--text);border:1px solid var(--line)}
   .leaflet-popup-content{font-size:13px;line-height:1.5}
@@ -68,7 +68,7 @@
   .leaflet-bar a{background:var(--panel);color:var(--text);border-color:var(--line)}
   .map-legend{position:absolute;left:12px;bottom:12px;z-index:500;background:rgba(29,33,43,.95);border:1px solid var(--line);border-radius:10px;padding:8px 11px;font-family:var(--mono);font-size:11px;color:var(--ink-soft);box-shadow:0 6px 18px rgba(0,0,0,.35)}
   .map-legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
-  .mapfallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;text-align:center;padding:40px;color:var(--muted);background:repeating-linear-gradient(45deg,#171715,#171715 12px,#1D1D1A 12px,#1D1D1A 24px)}
+  .mapfallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;text-align:center;padding:40px;color:var(--muted);background:repeating-linear-gradient(45deg,#141C2B,#141C2B 12px,#1A2333 12px,#1A2333 24px)}
   .mapfallback h3{color:var(--text);margin:0}
   .card{position:fixed;top:97px;right:14px;width:470px;max-width:92vw;height:calc(100% - 111px);background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);transform:translateX(calc(100% + 26px));transition:transform .28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;z-index:1100;overflow:hidden}
   .card.open{transform:translateX(0)}
@@ -116,7 +116,7 @@
   .vstep.done .vstep__n{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
   .vstep.done .vstep__line{background:var(--accent)}
   .vstep.done .vstep__t{color:var(--text)}
-  .vstep.active .vstep__n{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);box-shadow:0 0 0 4px rgba(181,233,22,.20)}
+  .vstep.active .vstep__n{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);box-shadow:0 0 0 4px rgba(0,71,67,.30)}
   .vstep.active .vstep__t{color:var(--text);font-weight:700}
   .vstep:hover .vstep__t{color:var(--text)}
   .funnel{margin-top:22px;border-top:1px dashed var(--line);padding-top:16px}
@@ -125,7 +125,7 @@
   .funnel__pin .pinico{font-size:15px}
   .fconn{height:14px;margin-left:24px;border-left:2px solid var(--line)}
   .fstep__card{border:1px solid var(--line);border-radius:12px;background:var(--panel2);overflow:hidden;transition:border-color .15s}
-  .fstep.open .fstep__card{border-color:var(--accent);box-shadow:0 6px 18px rgba(181,233,22,.10)}
+  .fstep.open .fstep__card{border-color:var(--accent);box-shadow:0 6px 18px rgba(0,71,67,.15)}
   .fstep__head{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}
   .fstep__n{flex:0 0 24px;height:24px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-family:var(--mono);font-weight:600;font-size:12px;display:flex;align-items:center;justify-content:center}
   .fstep__t{flex:1;font-family:inherit;font-weight:700;font-size:13.5px;line-height:1.2}
@@ -142,7 +142,7 @@
 
   /* --- крем-инверсия: этапы, карточка, модалка (ритм как в референсе) --- */
   .steps{background:var(--cream);border-color:transparent}
-  .steps__h{color:#0E5A4C}
+  .steps__h{color:#004743}
   .vstep__t{color:#6A6A5E}
   .vstep__n{background:#E0DFD2;border-color:#D5D4C6;color:#7A7A6E}
   .vstep__line{background:#D8D7CA}
@@ -153,21 +153,21 @@
   .card .sub{color:#6A6A5E}
   .card .close{color:#6A6A5E}
   .card .row .k{color:#6A6A5E}
-  .card .row a{color:#0E5A4C;font-weight:700}
-  .card .sec h4{color:#0E5A4C}
+  .card .row a{color:#004743;font-weight:700}
+  .card .sec h4{color:#004743}
   .card .sec p{color:#3F3F37}
   .card .actions{border-top:1px solid #DDDCCF}
   .card .btn-sec{background:#E2E1D4;color:#121210;border:1px solid #CFCEC0}
-  .card .btn-sec:hover{border-color:#0E5A4C}
+  .card .btn-sec:hover{border-color:#004743}
   .card .fstep__card{background:#E6E5D8;border-color:#D5D4C6}
-  .card .fstep.open .fstep__card{border-color:#0E5A4C;box-shadow:0 6px 18px rgba(4,57,51,.12)}
+  .card .fstep.open .fstep__card{border-color:#004743;box-shadow:0 6px 18px rgba(4,57,51,.12)}
   .card .fstep__desc{color:#6A6A5E}
   .card .fstep__t{color:#121210}
   .card .fstep__chev{color:#8A8A7E}
   .card .fcode{background:#F7F6EF;color:#1A1A18;border-color:#D5D4C6}
   .card .funnel{border-top:1px dashed #CFCEC0}
-  .card .funnel__lead{color:#0E5A4C}
-  .card .funnel__pin{background:#0E2A1F;border-color:#1E4A35;color:#EDECE3}
+  .card .funnel__lead{color:#004743}
+  .card .funnel__pin{background:#0E2A1F;border-color:#1E4A35;color:#F9F8F3}
   .card .fconn{border-left:2px solid #D5D4C6}
   .modal .box{background:var(--cream);color:#121210}
   .modal .mhead{border-bottom:1px solid #DDDCCF}
@@ -180,14 +180,14 @@
 
   /* --- крем: правая панель (фильтры + список) --- */
   .sidebar{background:var(--cream);border-color:transparent}
-  .search label{color:#0E5A4C}
+  .search label{color:#004743}
   .search input,.search select{background:#F7F6EF;border:1px solid #CFCEC0;color:#121210}
-  .search input:focus,.search select:focus{border-color:#0E5A4C}
+  .search input:focus,.search select:focus{border-color:#004743}
   .counter{color:#6A6A5E}
-  .counter b{color:#0E5A4C}
+  .counter b{color:#004743}
   .item{background:#F7F6EF;border-color:#D5D4C6}
-  .item:hover{border-color:#0E5A4C;box-shadow:0 4px 14px rgba(4,57,51,.10)}
-  .item.active{border-color:#0E5A4C;background:#E4EFC4}
+  .item:hover{border-color:#004743;box-shadow:0 4px 14px rgba(4,57,51,.10)}
+  .item.active{border-color:#004743;background:#DCEAE6}
   .item .name{color:#121210}
   .item .meta{color:#6A6A5E}
   .b-none{background:#F6DEDA;color:#A83226;border:1px solid #E4B7AF}
@@ -198,7 +198,7 @@
 
   /* --- фоновый шум (deliberate, лёгкий) --- */
   .bgnoise{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
-  .bgnoise span{position:absolute;font-family:var(--mono);font-weight:700;color:var(--accent);user-select:none}
+  .bgnoise span{position:absolute;font-family:var(--mono);font-weight:700;color:#E7E5E0;user-select:none}
   .bgnoise .g1{top:8%;left:36%;font-size:120px;opacity:.05;transform:rotate(-8deg)}
   .bgnoise .g2{bottom:6%;right:26%;font-size:90px;opacity:.05;transform:rotate(12deg)}
   .bgnoise .g3{top:56%;left:18%;font-size:64px;opacity:.045;color:var(--cream)}
@@ -207,7 +207,7 @@
   .layout,header,.marquee{position:relative;z-index:1}
   .squig{display:block;margin-top:4px}
   .marquee{position:relative;z-index:1;height:24px;display:flex;align-items:center;overflow:hidden;border-bottom:1px solid var(--line);background:var(--bg)}
-  .marquee__in{white-space:nowrap;font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);opacity:.55;animation:mq 40s linear infinite}
+  .marquee__in{white-space:nowrap;font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#9BA0AE;opacity:.6;animation:mq 40s linear infinite}
   @keyframes mq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
   @media (max-width:880px){
     html,body{height:auto;overflow:auto}
@@ -219,13 +219,13 @@
     .list{overflow:visible}
     .card{width:auto;left:0;right:0;top:0;height:100%;border-radius:0;border:none}
   }
-  ::-webkit-scrollbar{width:9px} ::-webkit-scrollbar-thumb{background:#2F2F2A;border-radius:6px}
+  ::-webkit-scrollbar{width:9px} ::-webkit-scrollbar-thumb{background:#2E3850;border-radius:6px}
 </style>
 </head>
 <body>
 <div class="bgnoise" aria-hidden="true"><span class="g1">✳</span><span class="g2">#</span><span class="g3">+</span><span class="g4">◳</span></div>
 <header>
-  <div class="logo">ИИ-Инженер<span class="logo-sub">Пробный урок</span><svg class="squig" width="96" height="7" viewBox="0 0 96 7" fill="none" aria-hidden="true"><path d="M1 5 Q7 1 13 5 T25 5 T37 5 T49 5 T61 5 T73 5 T85 5 T95 5" stroke="#B5E916" stroke-width="2" stroke-linecap="round" fill="none"/></svg></div>
+  <div class="logo">ИИ-Инженер<span class="logo-sub">Пробный урок</span><svg class="squig" width="96" height="7" viewBox="0 0 96 7" fill="none" aria-hidden="true"><path d="M1 5 Q7 1 13 5 T25 5 T37 5 T49 5 T61 5 T73 5 T85 5 T95 5" stroke="#E7E5E0" stroke-width="2" stroke-linecap="round" fill="none"/></svg></div>
   <div class="spacer"></div>
   <a class="cta" href="https://chat.qwen.ai" target="_blank" onclick="setStep(3)">Открыть Qwen ↗</a>
 </header>
