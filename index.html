@@ -205,7 +205,6 @@
   .bgnoise .g4{top:16%;right:6%;font-size:72px;opacity:.05;color:var(--cream);transform:rotate(6deg)}
   body::after{content:"";position:fixed;inset:0;z-index:2500;pointer-events:none;opacity:.05;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E")}
   .layout,header,.marquee{position:relative;z-index:1}
-  .squig{display:block;margin-top:4px}
   .marquee{position:relative;z-index:1;height:24px;display:flex;align-items:center;overflow:hidden;border-bottom:1px solid var(--line);background:var(--bg)}
   .marquee__in{white-space:nowrap;font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#9BA0AE;opacity:.6;animation:mq 40s linear infinite}
   @keyframes mq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
@@ -225,7 +224,7 @@
 <body>
 <div class="bgnoise" aria-hidden="true"><span class="g1">✳</span><span class="g2">#</span><span class="g3">+</span><span class="g4">◳</span></div>
 <header>
-  <div class="logo">ИИ-Инженер<span class="logo-sub">Пробный урок</span><svg class="squig" width="96" height="7" viewBox="0 0 96 7" fill="none" aria-hidden="true"><path d="M1 5 Q7 1 13 5 T25 5 T37 5 T49 5 T61 5 T73 5 T85 5 T95 5" stroke="#E7E5E0" stroke-width="2" stroke-linecap="round" fill="none"/></svg></div>
+  <div class="logo">ИИ-Инженер<span class="logo-sub">Пробный урок</span></div>
   <div class="spacer"></div>
   <a class="cta" href="https://chat.qwen.ai" target="_blank" onclick="setStep(3)">Открыть Qwen ↗</a>
 </header>
