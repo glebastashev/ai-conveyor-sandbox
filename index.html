@@ -21,12 +21,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Onest:wght@500;600;700;800&family=Unbounded:wght@500;700;900&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#111827; --panel:#1A2333; --panel2:#232D42; --line:rgba(255,255,255,0.09);
-    --text:#E7E5E0; --ink-soft:#C4C8D2; --muted:#8A90A2; --accent:#4460C4; --accent2:#5570CF;
-    --accent-ink:#F0EDE4; --claude:#9BA0AE; --warn:#E0A83E; --danger:#F07070; --chip:#232D42;
-    --cream:#F9F8F3;
+    --bg:#21335A; --panel:#F2EFE8; --panel2:#E8E4DA; --line:rgba(16,22,36,.14);
+    --text:#101624; --ink-soft:#3C4457; --muted:#6E7789; --accent:#21335A; --accent2:#16213C;
+    --accent-ink:#F2EFE8; --lime:#C2F07B; --claude:#6E7789; --warn:#C08A1E; --danger:#B0524D; --chip:#E8E4DA;
+    --cream:#F2EFE8;
     --mono:'JetBrains Mono',ui-monospace,monospace; --disp:'Unbounded','Onest','Manrope',sans-serif;
-    --radius:12px; --shadow:0 16px 40px rgba(0,0,0,.5);
+    --radius:0px; --shadow:0 18px 44px rgba(16,22,36,.18);
   }
   *{box-sizing:border-box}
   html,body{margin:0;height:100%}
@@ -59,13 +59,14 @@
   .b-tap{background:#2E2411;color:#FFD166;border:1px solid #5C4A1E}
   .b-stub{background:#241A38;color:#C0A8FF;border:1px solid #443A66}
   .mapwrap{position:relative;min-height:0;isolation:isolate;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
-  #map{width:100%;height:100%;background:#111827}
-  #map .leaflet-tile{filter:brightness(1.7) contrast(1.02)}
+  #map{width:100%;height:100%;background:var(--panel2)}
+  #map .leaflet-tile{filter:saturate(.85) contrast(1.04)}
   .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--panel);color:var(--text);border:1px solid var(--line)}
   .leaflet-popup-content{font-size:13px;line-height:1.5}
   .leaflet-popup-content a{color:var(--accent);font-weight:600}
   .leaflet-container a.leaflet-popup-close-button{color:var(--muted)}
   .leaflet-bar a{background:var(--panel);color:var(--text);border-color:var(--line)}
+.leaflet-control-attribution{background:rgba(242,239,232,.85)!important;color:#6E7789!important;font-family:var(--mono);font-size:10px}
   .map-legend{position:absolute;left:12px;bottom:12px;z-index:500;background:rgba(29,33,43,.95);border:1px solid var(--line);border-radius:10px;padding:8px 11px;font-family:var(--mono);font-size:11px;color:var(--ink-soft);box-shadow:0 6px 18px rgba(0,0,0,.35)}
   .map-legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
   .mapfallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;text-align:center;padding:40px;color:var(--muted);background:repeating-linear-gradient(45deg,#141C2B,#141C2B 12px,#1A2333 12px,#1A2333 24px)}
@@ -219,6 +220,26 @@
     .card{width:auto;left:0;right:0;top:0;height:100%;border-radius:0;border:none}
   }
   ::-webkit-scrollbar{width:9px} ::-webkit-scrollbar-thumb{background:#2E3850;border-radius:6px}
+
+/* ---- две кнопки нейросетей в шапке ---- */
+header .ctas{display:flex;align-items:center;gap:10px;flex:none;margin-left:auto}
+header .ctas__lb{white-space:nowrap;font-family:var(--mono);font-size:11px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--muted)}
+header .cta{text-decoration:none;color:var(--accent-ink);background:var(--accent);
+  font-family:var(--disp);font-weight:800;padding:9px 15px;border-radius:0;font-size:13px;white-space:nowrap}
+header .cta:hover{background:var(--accent2)}
+header .cta--alt{background:var(--lime);color:#101624}
+header .cta--alt:hover{background:#B0E45F}
+@media(max-width:760px){
+  header .ctas__lb{display:none}
+  header .cta{padding:8px 12px;font-size:12px}
+}
+@media(max-width:560px){
+  header{flex-wrap:wrap;row-gap:8px}
+  header .spacer{display:none}
+  header .ctas{margin-left:0;width:100%;gap:8px}
+  header .cta{flex:1;text-align:center}
+}
 </style>
 </head>
 <body>
@@ -226,7 +247,7 @@
 <header>
   <div class="logo">ИИ-Инженер<span class="logo-sub">Пробный урок</span></div>
   <div class="spacer"></div>
-  <a class="cta" href="https://chat.qwen.ai" target="_blank" onclick="setStep(3)">Открыть Qwen ↗</a>
+  <div class="ctas"><span class="ctas__lb">собрать в</span><a class="cta" href="https://chat.qwen.ai" target="_blank" onclick="setStep(3)">Qwen ↗</a><a class="cta cta--alt" href="https://chatgpt.com" target="_blank" onclick="setStep(3)">ChatGPT ↗</a></div>
 </header>
 <div class="marquee" aria-hidden="true"><div class="marquee__in">ИИ-ИНЖЕНЕР × ПЕСОЧНИЦА × СОБЕРИ САЙТ ДЛЯ БИЗНЕСА × ПЕРВЫЙ ЗАКАЗ БЛИЖЕ, ЧЕМ КАЖЕТСЯ × ИИ-ИНЖЕНЕР × ПЕСОЧНИЦА × СОБЕРИ САЙТ ДЛЯ БИЗНЕСА × ПЕРВЫЙ ЗАКАЗ БЛИЖЕ, ЧЕМ КАЖЕТСЯ × ИИ-ИНЖЕНЕР × ПЕСОЧНИЦА × СОБЕРИ САЙТ ДЛЯ БИЗНЕСА × ПЕРВЫЙ ЗАКАЗ БЛИЖЕ, ЧЕМ КАЖЕТСЯ × ИИ-ИНЖЕНЕР × ПЕСОЧНИЦА × СОБЕРИ САЙТ ДЛЯ БИЗНЕСА × ПЕРВЫЙ ЗАКАЗ БЛИЖЕ, ЧЕМ КАЖЕТСЯ × </div></div>
 
@@ -537,10 +558,10 @@ function dmPrompt(b){
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function promptByKey(b,key){ return key==='site'?sitePrompt(b):dmPrompt(b); }
 const FSTEPS=[
- {key:'site', n:1, title:'Промпт: сайт + окошко быстрых ответов', desc:'Открой Qwen (режим Web Dev) → вставь промпт → получишь готовый HTML-файл сайта со встроенным чатом. Можно и в Lovable, если оплачиваешь.'}
+ {key:'site', n:1, title:'Промпт: сайт + окошко быстрых ответов', desc:'Открой Qwen (режим Web Dev) или ChatGPT → вставь промпт → получишь готовый HTML-файл сайта со встроенным чатом. Можно и в Lovable, если оплачиваешь.'}
 ];
 function buildFunnel(b){
- let h='<div class="funnel"><div class="funnel__lead">Промпт для сайта — скопируй и вставь в Qwen</div>';
+ let h='<div class="funnel"><div class="funnel__lead">Промпт для сайта: скопируй и вставь в Qwen или ChatGPT</div>';
  h+=`<div class="funnel__pin"><span class="pinico">📌</span>Выбран: ${b.name} · ${b.area}</div>`;
  FSTEPS.forEach((st,i)=>{
    h+='<div class="fconn"></div>';
@@ -606,7 +627,7 @@ function render(){
 nicheSel.onchange=render; areaSel.onchange=render;
 
 /* ---- прогресс по этапам (левая колонка) ---- */
-const STEPS=["Выбери офлайн-бизнес на карте или в списке","Собери разбор этого бизнеса","Скопируй промпт из карточки и перенеси в Qwen","Qwen сгенерирует сайт с автоответчиком по этому промпту","Внеси желаемые правки","Прикрепи сайт на платформу"];
+const STEPS=["Выбери офлайн-бизнес на карте или в списке","Собери разбор этого бизнеса","Скопируй промпт из карточки и перенеси в Qwen или ChatGPT","Нейросеть сгенерирует сайт с автоответчиком по этому промпту","Внеси желаемые правки","Прикрепи сайт на платформу"];
 let currentStep=1;
 const stepsEl=$("#steps");
 function renderSteps(){
@@ -668,7 +689,7 @@ function drawMarkers(arr){
 function initMap(){
  myMap=L.map('map',{zoomControl:true,attributionControl:true}).setView([55.757,37.624],12);
  myMap.attributionControl.setPrefix(false); // убираем подпись Leaflet с флагом
- L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
+ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
    attribution:'© OpenStreetMap, © CARTO', subdomains:'abcd', maxZoom:19
  }).addTo(myMap);
  markerLayer=L.layerGroup().addTo(myMap);
