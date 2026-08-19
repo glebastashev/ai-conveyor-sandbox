@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ИИ-Инженер — Пробный урок</title>
+<title>AI-Инженер — Пробный урок</title>
 <!--
   ВКЛАДКА 1 — ПЕСОЧНИЦА для курса по ИИ.
   Студент: выбирает нишу → видит на карте реальные бизнесы ЦЕНТРА Москвы без сайта →
@@ -67,8 +67,8 @@
   .leaflet-container a.leaflet-popup-close-button{color:var(--muted)}
   .leaflet-bar a{background:var(--panel);color:var(--text);border-color:var(--line)}
 .leaflet-control-attribution{background:rgba(242,239,232,.85)!important;color:#6E7789!important;font-family:var(--mono);font-size:10px}
-  .map-legend{position:absolute;left:12px;bottom:12px;z-index:500;background:rgba(29,33,43,.95);border:1px solid var(--line);border-radius:10px;padding:8px 11px;font-family:var(--mono);font-size:11px;color:var(--ink-soft);box-shadow:0 6px 18px rgba(0,0,0,.35)}
-  .map-legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
+  .map-legend{position:absolute;left:12px;bottom:12px;z-index:500;background:#F2EFE8;border:1px solid rgba(16,22,36,.16);border-radius:0;padding:9px 12px;font-family:var(--mono);font-size:11.5px;font-weight:700;color:#101624;box-shadow:0 6px 18px rgba(16,22,36,.16)}
+  .map-legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle;box-shadow:0 0 0 1.5px rgba(16,22,36,.18)}
   .mapfallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;text-align:center;padding:40px;color:var(--muted);background:repeating-linear-gradient(45deg,#141C2B,#141C2B 12px,#1A2333 12px,#1A2333 24px)}
   .mapfallback h3{color:var(--text);margin:0}
   .card{position:fixed;top:97px;right:14px;width:470px;max-width:92vw;height:calc(100% - 111px);background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);transform:translateX(calc(100% + 26px));transition:transform .28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;z-index:1100;overflow:hidden}
@@ -205,9 +205,9 @@
   .bgnoise .g3{top:56%;left:18%;font-size:64px;opacity:.045;color:var(--cream)}
   .bgnoise .g4{top:16%;right:6%;font-size:72px;opacity:.05;color:var(--cream);transform:rotate(6deg)}
   body::after{content:"";position:fixed;inset:0;z-index:2500;pointer-events:none;opacity:.05;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E")}
-  .layout,header,.marquee{position:relative;z-index:1}
-  .marquee{position:relative;z-index:1;height:24px;display:flex;align-items:center;overflow:hidden;border-bottom:1px solid var(--line);background:var(--bg)}
-  .marquee__in{white-space:nowrap;font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#9BA0AE;opacity:.6;animation:mq 40s linear infinite}
+  .layout,header,
+  
+  
   @keyframes mq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
   @media (max-width:880px){
     html,body{height:auto;overflow:auto}
@@ -245,11 +245,11 @@ header .cta--alt:hover{background:#B0E45F}
 <body>
 <div class="bgnoise" aria-hidden="true"><span class="g1">✳</span><span class="g2">#</span><span class="g3">+</span><span class="g4">◳</span></div>
 <header>
-  <div class="logo">ИИ-Инженер<span class="logo-sub">Пробный урок</span></div>
+  <div class="logo">AI-Инженер<span class="logo-sub">Пробный урок</span></div>
   <div class="spacer"></div>
   <div class="ctas"><span class="ctas__lb">собрать в</span><a class="cta" href="https://chat.qwen.ai" target="_blank" onclick="setStep(3)">Qwen ↗</a><a class="cta cta--alt" href="https://chatgpt.com" target="_blank" onclick="setStep(3)">ChatGPT ↗</a></div>
 </header>
-<div class="marquee" aria-hidden="true"><div class="marquee__in">ИИ-ИНЖЕНЕР × ПЕСОЧНИЦА × СОБЕРИ САЙТ ДЛЯ БИЗНЕСА × ПЕРВЫЙ ЗАКАЗ БЛИЖЕ, ЧЕМ КАЖЕТСЯ × ИИ-ИНЖЕНЕР × ПЕСОЧНИЦА × СОБЕРИ САЙТ ДЛЯ БИЗНЕСА × ПЕРВЫЙ ЗАКАЗ БЛИЖЕ, ЧЕМ КАЖЕТСЯ × ИИ-ИНЖЕНЕР × ПЕСОЧНИЦА × СОБЕРИ САЙТ ДЛЯ БИЗНЕСА × ПЕРВЫЙ ЗАКАЗ БЛИЖЕ, ЧЕМ КАЖЕТСЯ × ИИ-ИНЖЕНЕР × ПЕСОЧНИЦА × СОБЕРИ САЙТ ДЛЯ БИЗНЕСА × ПЕРВЫЙ ЗАКАЗ БЛИЖЕ, ЧЕМ КАЖЕТСЯ × </div></div>
+
 
 <div class="layout">
   <aside class="steps" id="steps"></aside>
@@ -550,7 +550,7 @@ function dmPrompt(b){
 
 Заметил, что у вас сильная репутация и поток клиентов, но при этом нет своего сайта (${STATUS[b.st][1].toLowerCase()}). Сейчас почти весь выбор клиента — это карточка и переписка ${channel}.
 
-Я собираю сайты на ИИ-инструментах и за вечер сделал для вас рабочий прототип: с прайсом, онлайн-записью и блоком «${b.offers.split(",")[0].toLowerCase().trim()}». Вот ссылка, посмотрите: [вставь ссылку на сайт из Lovable].
+Я собираю сайты на AI-инструментах и за вечер сделал для вас рабочий прототип: с прайсом, онлайн-записью и блоком «${b.offers.split(",")[0].toLowerCase().trim()}». Вот ссылка, посмотрите: [вставь ссылку на сайт из Lovable].
 
 Если зайдёт — доведу до боевого варианта со своим доменом и подключу к рекламе. Когда удобно созвониться на 5 минут?`;
 }
