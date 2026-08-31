@@ -10,7 +10,7 @@
   открывает карточку с разбором → жмёт «Собрать промпт для Lovable» → копирует →
   идёт во вкладку 2 (Lovable) и собирает сайт.
 
-  КАРТА: OpenStreetMap через Leaflet (тёмные тайлы CARTO). Ключ и регистрация НЕ нужны —
+  КАРТА: Leaflet со светлой подложкой Esri. Ключ и регистрация НЕ нужны —
   карта с пинами работает из коробки. Координаты бизнесов зашиты в данные (геокод адресов).
   Нужен только интернет (Leaflet и тайлы грузятся с CDN).
 -->
@@ -776,7 +776,7 @@ function closeCard(){current=null;$("#card").classList.remove("open");render();}
 
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeCard();}});
 
-/* ====================== КАРТА (Leaflet + OpenStreetMap/CARTO, без ключа) ====================== */
+/* ====================== КАРТА (Leaflet + светлая подложка Esri, без ключа) ====================== */
 function markerColor(st){ return st==='none'?'#E5484D':st==='soc'?'#4CBF6B':st==='tap'?'#D08A1E':'#7A4FD0'; }
 function drawMarkers(arr){
  if(!markerLayer) return;
