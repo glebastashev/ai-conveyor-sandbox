@@ -139,6 +139,12 @@
   .fcopy{width:100%;background:var(--accent);color:var(--accent-ink);border:none;border-radius:9px;padding:11px;font-weight:700;font-family:inherit;font-size:13.5px;cursor:pointer}
   .fcopy:hover{background:var(--accent2)}
   .fcopy.done{background:#2E9E5B}
+  .ftabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
+  .ftab{background:transparent;color:var(--muted);border:1px solid var(--line);border-radius:8px;padding:8px;
+    font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer}
+  .ftab.on{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+  .card .ftab{color:#6A6A5E;border-color:#D5D4C6}
+  .card .ftab.on{color:var(--accent-ink)}
   .fcopy.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
   .fcopy.ghost:hover{background:rgba(255,255,255,.06)}
   .fpaste{width:100%;height:112px;resize:vertical;background:var(--bg);border:1px solid var(--line);border-radius:8px;
@@ -517,13 +523,36 @@ const STYLE = {
 };
 
 /* ====================== ГЕНЕРАТОРЫ ПРОМПТОВ ====================== */
-function sitePrompt(b){
+function sitePrompt(b, tool){
  const ch = b.socials==="—" ? "форму заявки" : b.socials.split(",")[0].trim();
+ const gpt = (tool||TOOL) === 'gpt';
+
+ const head = gpt
+ ? `ФОРМАТ ОТВЕТА, САМОЕ ВАЖНОЕ: в ответе должен быть только код, одним сплошным блоком, от <!DOCTYPE html> до закрывающего тега html. Ни одного слова до кода и после него: без вступлений, пояснений, заголовков, списков, комментариев о проделанной работе и предложений что-то доработать. Я копирую твой ответ целиком одним движением и сохраняю как index.html.
+Весь код держи в одном файле: стили и скрипты внутри, Tailwind через CDN.`
+ : `Собирай в режиме Web Dev и сразу покажи готовую страницу в предпросмотре, мне нужно увидеть отрисованный сайт прямо в окне чата.
+Весь код держи в одном файле: стили и скрипты внутри, Tailwind через CDN.`;
+
+ const pics = gpt
+ ? `КАРТИНКИ — изображения во всех блоках. Каждый <img> это полная рабочая ссылка вида https://..., открывается прямо в HTML, без пустых рамок и локальных путей; добавляй loading="lazy".
+Источник — Pollinations, он даёт чистые тематичные кадры без водяных знаков. Каждой картинке свой запрос на английском под нишу «${b.niche}» и под стиль сайта, и свой seed:
+  https://image.pollinations.ai/prompt/ОПИСАНИЕ?width=1024&height=683&nologo=true&seed=ЧИСЛО
+(пробелы в ОПИСАНИИ заменяй на %20; ЧИСЛО разное у каждой картинки).
+Подстраховка от битых картинок обязательна: каждому <img> добавь onerror, который подменяет на реальное фото по теме:
+  onerror="this.onerror=null;this.src='https://loremflickr.com/1024/683/КЛЮЧЕВЫЕ,СЛОВА'"
+Куда ставить: hero это широкое фоновое фото, галерея это 6 разных кадров по теме, в карточках услуг по фото.`
+ : `КАРТИНКИ — настоящее изображение нужно только на первом экране. Фон hero бери по ссылке:
+  https://image.pollinations.ai/prompt/ОПИСАНИЕ?width=1600&height=900&nologo=true&seed=ЧИСЛО
+(ОПИСАНИЕ на английском под нишу «${b.niche}», пробелы заменяй на %20).
+Во всех остальных блоках фотографий не ставь совсем. На их месте делай аккуратные плашки под будущее фото в цветах сайта: мягкая заливка фирменным оттенком, скруглённые углы, тонкая рамка и по центру мелкая подпись, что сюда встанет («фото работы», «интерьер», «мастер за работой»). Пропорции держи как у настоящих фото, чтобы вёрстка не поехала, когда снимки заменят на реальные. Никаких серых пустых прямоугольников и случайных стоковых картинок.`;
+
+ const tail = gpt
+ ? `Повторю про формат: в ответе только код, одним блоком, без единой строки текста вокруг него.`
+ : `Когда всё готово, покажи страницу в предпросмотре и одной строкой напиши, что можно поправить дальше.`;
+
  return `Сделай современный одностраничный сайт (лендинг) для бизнеса «${b.name}» — ${b.niche.toLowerCase()} в центре Москвы (${b.district}). Язык — русский.
 
-СРАЗУ ПОКАЖИ ГОТОВУЮ СТРАНИЦУ В ПРЕДПРОСМОТРЕ: в Qwen это режим Web Dev, в ChatGPT это Canvas. Мне нужно увидеть отрисованный сайт прямо в окне чата. Код отдавай заодно, если тебе так удобнее, это не мешает.
-Если это ChatGPT без входа в аккаунт, Canvas там недоступен. Тогда выведи весь код одним блоком целиком, от <!DOCTYPE html> до закрывающего html, чтобы я скопировал его в один приём. Дробить на части и объяснять по кускам не нужно.
-Весь код держи в одном файле, стили и скрипты внутри, Tailwind через CDN: так и предпросмотр отрисует страницу целиком, и сохранённый файл откроется сам по себе.
+${head}
 
 КОНТЕКСТ БИЗНЕСА (из карточки Яндекс.Карт):
 • Чем занимаются: ${b.desc}
@@ -533,32 +562,26 @@ function sitePrompt(b){
 ЗАЧЕМ САЙТ (главная задача): ${b.missing}
 
 СТРУКТУРА СТРАНИЦЫ:
-1. Hero-экран: название, короткий цепляющий оффер, кнопка «Записаться»/«Заказать», телефон ${b.phone}; на фоне — тематическое фото (см. блок КАРТИНКИ).
+1. Hero-экран: название, короткий цепляющий оффер, кнопка «Записаться»/«Заказать», телефон ${b.phone}; на фоне тематическое фото (см. блок КАРТИНКИ).
 2. Услуги и цены: ${b.offers}
 3. «Почему мы» — закрой боли клиента: ${b.pains}
-4. Галерея работ — сетка из 6 тематических фото (см. блок КАРТИНКИ).
+4. Галерея работ — сетка из 6 блоков (см. блок КАРТИНКИ).
 5. Отзывы — 3-4 карточки-плейсхолдера (бизнес реально с высоким рейтингом).
 6. Блок записи: форма (имя, телефон, услуга, удобная дата) + адрес «${b.address}» + кнопки мессенджеров (${b.socials}).
 7. Футер: адрес, телефон, режим работы, соцсети.
 
 ОКОШКО БЫСТРЫХ ОТВЕТОВ (встрой сразу в этот же файл, чистый JS без бэкенда):
 • Плавающая кнопка чата в правом нижнем углу, всплывающее приветствие через 3 секунды.
-• По клику — панель с кнопками быстрых вопросов: «Цены», «Как записаться», «Где вы», «Сколько по времени».
-• На каждый вопрос — готовый ответ из данных бизнеса (услуги и цены: ${b.offers}; адрес: ${b.address}; телефон: ${b.phone}).
-• Внизу панели — мини-форма «оставить заявку» (имя + телефон) и кнопка перехода в ${ch}.
+• По клику панель с кнопками быстрых вопросов: «Цены», «Как записаться», «Где вы», «Сколько по времени».
+• На каждый вопрос готовый ответ из данных бизнеса (услуги и цены: ${b.offers}; адрес: ${b.address}; телефон: ${b.phone}).
+• Внизу панели мини-форма «оставить заявку» (имя + телефон) и кнопка перехода в ${ch}.
 • Корректно работает на телефоне.
 
-КАРТИНКИ — ОБЯЗАТЕЛЬНО изображения во всех блоках. Каждый <img> — полная рабочая ссылка вида https://..., открывается прямо в HTML; без пустых рамок, серых заглушек и локальных путей; добавляй loading="lazy".
-Основной источник — Pollinations (AI, даёт чистые тематичные кадры без водяных знаков). Каждой картинке — свой запрос на английском под нишу «${b.niche}» и под стиль сайта, и свой seed:
-  https://image.pollinations.ai/prompt/ОПИСАНИЕ?width=1024&height=683&nologo=true&seed=ЧИСЛО
-(пробелы в ОПИСАНИИ заменяй на %20; ЧИСЛО — разное у каждой картинки).
-ОБЯЗАТЕЛЬНО подстраховка от битых картинок: каждому <img> добавь onerror, который подменяет на реальное фото по теме:
-  onerror="this.onerror=null;this.src='https://loremflickr.com/1024/683/КЛЮЧЕВЫЕ,СЛОВА'"
-Куда ставить: hero — широкое фоновое фото; галерея — 6 разных кадров по теме; в карточках услуг — по фото. Проверь, что все картинки реально отображаются.
+${pics}
 
 ДИЗАЙН: ${STYLE[b.niche]||"чистый современный, адаптив"}. Полностью адаптивно под телефон, заметные кнопки призыва к действию, быстрая загрузка.
 
-Когда всё готово, покажи страницу в предпросмотре и одной строкой напиши, что можно поправить дальше.`;
+${tail}`;
 }
 function dmPrompt(b){
  const channel = b.socials==="—" || b.socials.indexOf("только")>=0 ? "в личные сообщения" : `в ${b.socials.split(",")[0].trim()}`;
@@ -572,9 +595,21 @@ function dmPrompt(b){
 }
 /* ---- воронка промптов в карточке ---- */
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function promptByKey(b,key){ return key==='site'?sitePrompt(b):dmPrompt(b); }
+let TOOL='gpt';
+const TOOL_DESC={
+ gpt:'Открой ChatGPT, вставь промпт. В ответ придёт сплошной код без пояснений: копируй его целиком и переходи ко второму шагу. Если у тебя есть Canvas, страница соберётся прямо в нём.',
+ qwen:'Открой Qwen, включи режим Web Dev и вставь промпт. Страница со встроенным чатом сразу отрисуется в предпросмотре, код рядом копируется одной кнопкой.'
+};
+function promptByKey(b,key){ return key==='site'?sitePrompt(b,TOOL):dmPrompt(b); }
+function setTool(t){
+ TOOL=t;
+ document.querySelectorAll('.ftab').forEach(el=>el.classList.toggle('on', el.dataset.t===t));
+ const d=document.getElementById('promptDesc'); if(d) d.textContent=TOOL_DESC[t];
+ const c=document.getElementById('promptCode'); if(c && current!==null) c.textContent=promptByKey(DATA[current],'site');
+ const btn=document.getElementById('promptCopy'); if(btn){ btn.textContent='Скопировать промпт'; btn.classList.remove('done'); }
+}
 const FSTEPS=[
- {key:'site', n:1, title:'Промпт: сайт + окошко быстрых ответов', desc:'Открой Qwen в режиме Web Dev или ChatGPT с Canvas → вставь промпт → страница со встроенным чатом сразу отрисуется в предпросмотре, её видно прямо в чате. Можно и в Lovable, если оплачиваешь.'},
+ {key:'site', n:1, title:'Промпт: сайт + окошко быстрых ответов', desc:''},
  {key:'preview', n:2, title:'Посмотреть сайт', desc:'В ChatGPT без входа в аккаунт предпросмотра нет, там код приходит текстом. Скопируй его целиком из чата и вставь сюда: сайт откроется в новой вкладке, а файл index.html скачается кнопкой рядом. Возиться с блокнотом и расширениями не придётся.'}
 ];
 function buildFunnel(b){
@@ -585,7 +620,7 @@ function buildFunnel(b){
    h+=`<div class="fstep ${i===0?'open':''}" data-k="${st.key}" style="margin:0 ${i*12}px">
         <div class="fstep__card">
           <div class="fstep__head" onclick="toggleStep('${st.key}')"><span class="fstep__n">${st.n}</span><span class="fstep__t">${st.title}</span><span class="fstep__chev">▾</span></div>
-          <div class="fstep__body">${st.key==='preview' ? previewBody() : `<p class="fstep__desc">${st.desc}</p><div class="fcode">${esc(promptByKey(b,st.key))}</div><button class="fcopy" onclick="copyPrompt('${st.key}',this)">Скопировать промпт</button>`}</div>
+          <div class="fstep__body">${st.key==='preview' ? previewBody() : `<div class="ftabs"><button class="ftab ${TOOL==='gpt'?'on':''}" data-t="gpt" onclick="setTool('gpt')">ChatGPT</button><button class="ftab ${TOOL==='qwen'?'on':''}" data-t="qwen" onclick="setTool('qwen')">Qwen</button></div><p class="fstep__desc" id="promptDesc">${TOOL_DESC[TOOL]}</p><div class="fcode" id="promptCode">${esc(promptByKey(b,st.key))}</div><button class="fcopy" id="promptCopy" onclick="copyPrompt('${st.key}',this)">Скопировать промпт</button>`}</div>
         </div>
       </div>`;
  });
