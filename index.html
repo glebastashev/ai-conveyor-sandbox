@@ -795,10 +795,10 @@ function initMap(){
  myMap.attributionControl.setPrefix(false); // убираем подпись Leaflet с флагом
  // CARTO стал требовать ключ и печатает водяной знак поверх тайлов, поэтому светлая подложка от Esri
  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',{
-   attribution:'© Esri, © OpenStreetMap', maxNativeZoom:16, maxZoom:19
+   attribution:'© Esri, © OpenStreetMap', maxNativeZoom:16, maxZoom:19, detectRetina:true
  }).addTo(myMap);
  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}',{
-   attribution:'', maxNativeZoom:16, maxZoom:19, pane:'shadowPane'
+   attribution:'', maxNativeZoom:16, maxZoom:19, pane:'shadowPane', detectRetina:true
  }).addTo(myMap);
  markerLayer=L.layerGroup().addTo(myMap);
  mapReady=true; $("#mapfallback").style.display="none";
