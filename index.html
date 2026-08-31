@@ -797,9 +797,9 @@ function initMap(){
  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',{
    attribution:'© Esri, © OpenStreetMap', maxNativeZoom:16, maxZoom:19, detectRetina:true
  }).addTo(myMap);
- L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}',{
-   attribution:'', maxNativeZoom:16, maxZoom:19, pane:'shadowPane', detectRetina:true
- }).addTo(myMap);
+ // слой подписей у Esri дублирует названия кириллицей и латиницей и на плотном экране мельчает,
+ // поэтому карта остаётся чистой: ориентир дают пины и адрес в карточке
+
  markerLayer=L.layerGroup().addTo(myMap);
  mapReady=true; $("#mapfallback").style.display="none";
  render();
