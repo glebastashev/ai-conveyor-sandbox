@@ -527,6 +527,8 @@ function sitePrompt(b, tool){
 
  const head =
   t==='gpt'  ? `ФОРМАТ ОТВЕТА, САМОЕ ВАЖНОЕ: в ответе должен быть только код, одним сплошным блоком, от <!DOCTYPE html> до закрывающего тега html. Ни одного слова до кода и после него: без вступлений, пояснений, заголовков, списков, комментариев о проделанной работе и предложений что-то доработать. Я копирую твой ответ целиком одним движением и сохраняю как index.html.
+РОВНО ОДИН БЛОК КОДА. Не разбивай ответ на несколько блоков, не выноси стили и скрипты в отдельные блоки, не пиши «часть 1», «продолжение» и «остальное по запросу». Между кусками кода не должно быть ни одной строки текста.
+Чтобы ответ поместился целиком, держи страницу компактной: оформление классами Tailwind, свой блок style короткий, тексты по делу, комментариев в коде нет, повторяющиеся куски не дублируй. Если видишь, что не помещаешься, сократи тексты и число карточек в галерее, но код оставь одним куском от начала до конца.
 Весь код держи в одном файле: стили и скрипты внутри, Tailwind через CDN.`
 : t==='plus' ? `Собери страницу в Canvas и покажи её там сразу, мне нужно увидеть готовый сайт, а не разбирать код в переписке. Пояснения к коду не пиши.
 Весь код держи в одном файле: стили и скрипты внутри, Tailwind через CDN.`
@@ -610,7 +612,7 @@ function setTool(t){
 }
 const FSTEPS=[
  {key:'site', n:1, title:'Промпт: сайт + окошко быстрых ответов', desc:''},
- {key:'preview', n:2, title:'Посмотреть сайт', desc:'В ChatGPT без входа в аккаунт предпросмотра нет, там код приходит текстом. Скопируй его целиком из чата и вставь сюда: сайт откроется в новой вкладке, а файл index.html скачается кнопкой рядом. Возиться с блокнотом и расширениями не придётся.'}
+ {key:'preview', n:2, title:'Посмотреть сайт', desc:'В ChatGPT без входа в аккаунт предпросмотра нет, там код приходит текстом. Скопируй его из чата и вставь сюда: сайт откроется в новой вкладке, а файл index.html скачается кнопкой рядом. Если чат разбил ответ на несколько блоков, вставляй их подряд, склею сам.'}
 ];
 function buildFunnel(b){
  let h='<div class="funnel"><div class="funnel__lead">Два шага: забрать промпт и посмотреть готовый сайт</div>';
@@ -630,6 +632,7 @@ function previewBody(){
  const st = FSTEPS.find(x=>x.key==='preview');
  return `<p class="fstep__desc">${st.desc}</p>
    <textarea class="fpaste" id="pasteCode" placeholder="Вставь сюда код страницы из чата, начинается с <!DOCTYPE html>"></textarea>
+   <div class="fhint">Если чат выдал код несколькими кусками, вставляй их сюда подряд, один за другим. Лишний текст между ними я отрежу сам.</div>
    <div class="frow">
      <button class="fcopy" onclick="previewPasted()">Открыть сайт</button>
      <button class="fcopy ghost" onclick="downloadPasted()">Скачать index.html</button>
@@ -638,10 +641,20 @@ function previewBody(){
 }
 function pastedCode(){
  const el = document.getElementById('pasteCode');
- let t = el ? el.value.trim() : '';
- t = t.replace(/^```[a-z]*\s*/i,'').replace(/```\s*$/,'').trim();  // если скопировали вместе с ограждением
- return t;
+ let t = el ? el.value : '';
+ if(!t.trim()) return '';
+ // чат нередко режет ответ на несколько блоков: склеиваем их по порядку
+ const fences = [...t.matchAll(/```[a-z]*\r?\n([\s\S]*?)```/gi)].map(m=>m[1]);
+ if(fences.length) t = fences.join('\n');
+ // отрезаем болтовню вокруг разметки
+ const i = t.search(/<!DOCTYPE html|<html[\s>]/i);
+ if(i >= 0){
+   const j = t.toLowerCase().lastIndexOf('</html>');
+   t = j > i ? t.slice(i, j+7) : t.slice(i);
+ }
+ return t.replace(/^```[a-z]*\s*/i,'').replace(/```\s*$/,'').trim();
 }
+function looksCut(code){ return !/<\/html>\s*$/i.test(code); }
 function pasteHint(msg){ const h=document.getElementById('pasteHint'); if(h) h.textContent=msg; }
 function previewPasted(){
  const code = pastedCode();
@@ -649,7 +662,9 @@ function previewPasted(){
  const w = window.open('', '_blank');
  if(!w){ pasteHint('Браузер заблокировал новую вкладку. Разреши всплывающие окна для этого сайта и нажми ещё раз.'); return; }
  w.document.open(); w.document.write(code); w.document.close();
- pasteHint('Сайт открылся в соседней вкладке.');
+ pasteHint(looksCut(code)
+   ? 'Сайт открылся, но код обрывается на середине. Напиши в чат «продолжи код с того места, где остановился» и вставь продолжение сюда же, следом за первой частью.'
+   : 'Сайт открылся в соседней вкладке.');
  setStep(4);
 }
 function downloadPasted(){
