@@ -39,7 +39,11 @@
   header .spacer{flex:1}
   header .cta{text-decoration:none;color:var(--accent-ink);background:var(--accent);font-weight:800;padding:9px 16px;border-radius:6px;font-size:14px}
   header .cta:hover{background:var(--accent2)}
-  .layout{display:grid;grid-template-columns:250px 480px 1fr;gap:14px;padding:14px;height:calc(100% - 83px)}
+  /* высоту берём от окна, а не от родителя: во встройке height:100% растягивал карту
+     и уводил легенду под сгиб, а Leaflet оставался с прежним размером */
+  .layout{display:grid;grid-template-columns:250px 480px 1fr;gap:14px;padding:14px;
+    height:calc(100vh - 83px);min-height:600px;max-height:900px}
+  @supports (height:100dvh){.layout{height:calc(100dvh - 83px)}}
   .sidebar{display:flex;flex-direction:column;min-height:0;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
   .search{padding:14px 14px 8px}
   .search label{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
@@ -58,7 +62,7 @@
   .b-soc{background:#3A53B5;color:#8FD9A8;border:1px solid #4460C4}
   .b-tap{background:#2E2411;color:#FFD166;border:1px solid #5C4A1E}
   .b-stub{background:#241A38;color:#C0A8FF;border:1px solid #443A66}
-  .mapwrap{position:relative;min-height:0;isolation:isolate;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+  .mapwrap{position:relative;min-height:280px;max-height:860px;isolation:isolate;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
   #map{width:100%;height:100%;background:var(--panel2)}
   #map .leaflet-tile{filter:saturate(.85) contrast(1.04)}
   .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--panel);color:var(--text);border:1px solid var(--line)}
@@ -803,8 +807,24 @@ function initMap(){
  markerLayer=L.layerGroup().addTo(myMap);
  mapReady=true; $("#mapfallback").style.display="none";
  render();
- setTimeout(()=>myMap.invalidateSize(),200);
- window.addEventListener('resize',()=>myMap.invalidateSize());
+
+ // контейнер может получить размер позже нас: во встройке платформа меняет высоту
+ // после загрузки, события resize при этом не приходит. Поэтому следим за самим блоком
+ // и, пока пользователь не трогал карту, держим все пины в кадре.
+ let touched=false;
+ myMap.on('dragstart zoomstart', ()=>{ touched=true; });
+ function refit(){
+   myMap.invalidateSize();
+   if(touched) return;
+   const pts=DATA.map(d=>d.coords);
+   if(pts.length) myMap.fitBounds(L.latLngBounds(pts).pad(0.14), {animate:false});
+ }
+ refit();
+ requestAnimationFrame(refit);
+ [120,400,1200].forEach(ms=>setTimeout(refit,ms));
+ window.addEventListener('resize', refit);
+ window.addEventListener('load', refit);
+ if(window.ResizeObserver) new ResizeObserver(refit).observe(document.getElementById('map'));
 }
 function loadMap(){ if(typeof L==='undefined'){ render(); return; } initMap(); }
 
